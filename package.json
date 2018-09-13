@@ -1,0 +1,39 @@
+{
+  "name": "bft",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "make serve"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bootstrap": "4.1.2",
+    "classnames": "^2.2.6",
+    "express": "^4.16.3",
+    "prop-types": "^15.6.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-icons": "^2.2.7",
+    "react-router-dom": "^4.1.1",
+    "react-scripts": "^1.1.5"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.6",
+    "babel-loader": "^7.0.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-plugin-react": "^7.10.0",
+    "image-webpack-loader": "^4.3.1",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
+  }
+}
