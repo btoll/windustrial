@@ -1,8 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import CurrencyAmount from './CurrencyAmount';
-import PercentAmount from './PercentAmount';
+import Currency from './formatters/Currency';
+import Percent from './formatters/Percent';
 
 class Percentage extends React.Component {
     constructor(props) {
@@ -13,7 +12,7 @@ class Percentage extends React.Component {
         }
     }
 
-    render () {
+    render() {
         return (
             <div>
                 <select onChange={this.props.handleChange.bind(null, this.props.scenario, this.props.row)}>
@@ -33,7 +32,7 @@ class Percentage extends React.Component {
     }
 }
 
-const ChildSection = props => {
+const ForecastGroup = props => {
     const styles = {
         childRow: {
             fontSize: '16px'
@@ -59,11 +58,11 @@ const ChildSection = props => {
 //        if (props.visible && props.visible === true) {
             return <div style={styles.childRow} key={props.row.Id} className="row">
                 <div className="col col-sm-2">{props.row.LineItem}</div>
-                <div className={pastClass2}><CurrencyAmount value={props.row.CurrentStartAmount + ''} /></div>
-                <div className="col col-sm-2 pull-left text-right"><CurrencyAmount value={props.row.CurrentEndAmount + ''} /></div>
-                <div className={pastClass1}><PercentAmount value={props.row.ForecastPercentChange + ''} /></div>
-                <div className="col col-sm-2 pull-left text-right"><CurrencyAmount value={props.row.ForecastAmount + ''} /></div>
-                <div className="col col-sm-1 pull-left text-right"><PercentAmount value={props.row.ForecastPercentChange + ''} /></div>
+                <div className={pastClass2}><Currency value={props.row.CurrentStartAmount + ''} /></div>
+                <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.CurrentEndAmount + ''} /></div>
+                <div className={pastClass1}><Percent value={props.row.ForecastPercentChange + ''} /></div>
+                <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.ForecastAmount + ''} /></div>
+                <div className="col col-sm-1 pull-left text-right"><Percent value={props.row.ForecastPercentChange + ''} /></div>
                 <Percentage
                     handleChange={props.handleChange}
                     scenario={props.scenario}
@@ -79,11 +78,5 @@ const ChildSection = props => {
     )
 }
 
-ChildSection.propTypes = {
-    row: PropTypes.object.isRequired,
-//    visible: PropTypes.bool.isRequired,
-//    pastVisible: PropTypes.bool.isRequired
-}
-
-export default ChildSection;
+export default ForecastGroup;
 
