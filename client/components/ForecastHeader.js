@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactModal from 'react-modal';
 
+import ForecastModal from './ForecastModal';
+
 const styles = {
     container: {
         marginLeft: '10px',
@@ -50,6 +52,19 @@ function InfoHeader(props) {
     );
 }
 
+function Actions(props) {
+    return (
+        <select onChange={props.onActionChange} id="actionsList">
+            <option>Select an action</option>
+            <option>Build a new scenario</option>
+            <option>Retrive a saved scenario</option>
+            <option>Update saved scenario</option>
+            <option>Evaluate performance</option>
+            <option>Build Overrides</option>
+        </select>
+    );
+}
+
 class ForecastHeader extends React.Component {
     constructor(props) {
         super(props);
@@ -63,27 +78,39 @@ class ForecastHeader extends React.Component {
             <div style={styles.container}>
                 <div style={styles.headerText}>Budget & Forecast</div>
                 <hr />
+
                 <p>
                     <span style={styles.labelStyle}>Scenario Name:</span>
                     <span style={styles.textStyle}>{this.props.scenario.name}</span>
                     <button
-                        onClick={this.props.onOpenModal}
+                        onClick={this.props.openModal.bind(null, 'infoModal')}
                         style={styles.textStyle}
                     >info
                     </button>
                 </p>
 
-                <ReactModal
-                    isOpen={this.props.showModal}
-                    contentLabel='Forecast Header Information'
-                    shouldCloseOnEsc={true}
-                    ariaHideApp={true}
-                    closeTimeoutMS={150}
-                    onRequestClose={this.props.onCloseModal} // For closing using ESC key.
-                >
-                    <button onClick={this.props.onCloseModal}>Close and Save</button>
-                    <InfoHeader scenario={this.props.scenario} />
-                </ReactModal>
+                <input onClick={this.props.openModal.bind(null, 'actionsModal')} type='button' className='actionButton' value='Actions' />
+
+                {this.props.modal.show ?
+                    <ForecastModal
+                        className={`${this.props.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.props.onCloseModal}
+                        showModal={this.props.modal.show}
+                    >
+                        {this.props.modal.type === 'infoModal' ?
+                            <div>
+                                <button onClick={this.props.closeModal}>Close and Save</button>
+                                <InfoHeader scenario={this.props.scenario} />
+                            </div>
+                        :
+                            <div>
+                                <button onClick={this.props.closeModal}>Close</button>
+                                <Actions onActionChange={this.props.actionChange} />
+                            </div>
+
+                        }
+                    </ForecastModal>
+                : null}
             </div>
         )
     };

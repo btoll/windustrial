@@ -35,7 +35,11 @@ class Forecast extends React.Component {
                 'Sales, General, Admin Expenses': [],
                 '': [] // COGS
             },
-            showModal: false
+            modal: {
+                show: false,
+                type: null
+            },
+            dirty: false
         }
 
         this.styles = {
@@ -73,9 +77,17 @@ class Forecast extends React.Component {
             }
         }
 
+        this.actionChange = this.actionChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+    }
+
+    actionChange(e) {
+        // Prompt to save or otherwise disallow since the source data has been updated/changed.
+        if (this.state.dirty) {
+            console.log('dirty');
+        }
     }
 
     handleChange(scenario, row, e) {
@@ -90,15 +102,26 @@ class Forecast extends React.Component {
                 });
             })
             .catch(console.log);
+
+            this.setState({dirty: true});
         }
     }
 
-    openModal(e) {
-        this.setState({showModal: true});
+    openModal(type, e) {
+        this.setState({
+            modal: {
+                show: true,
+                type
+            }
+        });
     }
 
     closeModal(e) {
-        this.setState({showModal: false});
+        this.setState({
+            modal: {
+                show: false
+            }
+        });
     }
 
     renderGroup(groupName) {
@@ -165,10 +188,12 @@ class Forecast extends React.Component {
         return (
             <div>
                 <ForecastHeader
+                    modal={this.state.modal}
                     scenario={this.state.scenario}
-                    showModal={this.state.showModal}
-                    onOpenModal={this.openModal}
-                    onCloseModal={this.closeModal}
+
+                    actionChange={this.actionChange}
+                    closeModal={this.closeModal}
+                    openModal={this.openModal}
                 />
 
                 <div className='container-fluid'>
@@ -193,6 +218,8 @@ class Forecast extends React.Component {
                     {this.renderGroup('Sales, General, Admin Expenses')}
                     {this.renderGroup('Non-Operating')}
                 </div>
+
+                <input onClick={() => {}} type='button' className='actionButton' value='Save' />
             </div>
         )
     }

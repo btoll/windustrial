@@ -32,6 +32,80 @@ body {
     width: 50px;
 }
 
+/* React Modal plugin */
+.ReactModal__Content__base { /* We need to explicitly define this here since passing in a */
+  position: absolute;        /* className will prevent these from being applied by the plugin. */
+  top: 40px;
+  left: 40px;
+  right: 40px;
+  bottom: 40px;
+  border: 1px solid #ccc;
+  background: #fff;
+  overflow: auto;
+  WebkitOverflowScrolling: touch;
+  borderRadius: 4px;
+  outline: none;
+  padding: 20px
+}
+
+.ReactModal__Content {
+    opacity: 0;
+}
+
+.ReactModal__Content--after-open {
+    opacity: 1;
+    transition: opacity 150ms;
+}
+
+.ReactModal__Content--before-close {
+    opacity: 0;
+}
+
+/* Budget & Forecast modal on Forecast page */
+.infoModal {
+    height: 500px;
+    width: 600px;
+}
+#infoHeader {
+    margin: 40px;
+    padding: 10px;
+}
+#infoHeader label {
+    background-color: antiquewhite;
+    font-weight: bold;
+    margin-right: 2em;
+    padding: .2em 1em;
+    width: 200px;
+}
+/**/
+
+/* Actions modal on Forecast page */
+.actionsModal {
+    height: 300px;
+    width: 300px;
+}
+#actionsList {
+    margin: 20px;
+}
+/**/
+
+.actionButton {
+    background-color: maroon;
+    border: 0;
+    border-radius: 5em;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 40%;
+    padding: 1.2em;
+    width: 150px;
+}
+
+.actionButton:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
