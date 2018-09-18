@@ -94,7 +94,7 @@ class Forecast extends React.Component {
         if (e.target.value * 1) {
             axios.post(`http://localhost:3001/api/scenario/${scenario.name}/${scenario.description}/${scenario.monthEnd}`, {
                 rowId: row.Id,
-                percent: e.target.value
+                percent: e.target.value / 100
             })
             .then(res => {
                 this.setState({

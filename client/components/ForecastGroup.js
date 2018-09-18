@@ -19,7 +19,7 @@ class Percentage extends React.Component {
                 <select onChange={this.props.handleChange.bind(null, this.props.scenario, this.props.row)}>
                     <option>Choose a percentage</option>
                     {PERCENTAGES.map(n =>
-                        <option key={n}>{n}</option>
+                        <option key={n} value={n/100}>{n}</option>
                     )}
                 </select>
                 <input
