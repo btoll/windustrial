@@ -2,6 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import Currency from './formatters/Currency';
 import Percent from './formatters/Percent';
+import { PERCENTAGES } from './config';
 
 class Percentage extends React.Component {
     constructor(props) {
@@ -17,10 +18,9 @@ class Percentage extends React.Component {
             <div>
                 <select onChange={this.props.handleChange.bind(null, this.props.scenario, this.props.row)}>
                     <option>Choose a percentage</option>
-                    <option>3</option>
-                    <option>5</option>
-                    <option>7</option>
-                    <option>9</option>
+                    {PERCENTAGES.map(n =>
+                        <option key={n}>{n}</option>
+                    )}
                 </select>
                 <input
                     className="Percentage-custom"
