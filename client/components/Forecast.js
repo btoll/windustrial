@@ -19,12 +19,16 @@ class Forecast extends React.Component {
 
         this.state = {
             expanded: {
+//                'Gross Revenue': false,
+//                'COGS Total': false,
+//                'Gross Margin': false,
+//                'Sales, General & Admin': false,
+//                'Profit': false,
+//                'Non Operating': false
                 'Gross Revenue': false,
-                'COGS Total': false,
-                'Gross Margin': false,
-                'Sales, General & Admin': false,
-                'Profit': false,
-                'Non Operating': false
+                'Non-Operating': false,
+                'Sales, General, Admin Expenses': false,
+                '': false
             },
             pastVisible: true,
 
@@ -54,10 +58,6 @@ class Forecast extends React.Component {
                 fontSize: '12px',
 
             },
-            parentRow: {
-                fontWeight: 'bold',
-                cursor: 'pointer'
-            },
             parentRowTotal: {
                 marginBottom: '25px'
             },
@@ -81,6 +81,7 @@ class Forecast extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
     }
 
     actionChange(e) {
@@ -124,31 +125,35 @@ class Forecast extends React.Component {
         });
     }
 
-    renderGroup(groupName) {
-        return (
-            <div>
-                <div style={this.styles.parentRow} className='row'>
-                    <div className='col col-sm-2'>{groupName || 'COGS'}</div>
-                </div>
-                <div>
-                    {this.renderGroupRows(groupName)}
-                </div>
-            </div>
+    toggleExpandCollapse(groupName) {
+        this.setState(() =>
+            this.state.expanded[groupName] = !this.state.expanded[groupName]
         );
     }
 
-    renderGroupRows(groupName) {
-        const group = this.state.forecast[groupName];
-        return group.map((c, index) => {
-            return <div key={index}>
-                <ForecastGroup
-                    key={c.Id}
-                    row={c}
-                    scenario={this.state.scenario}
-                    handleChange={this.handleChange}
-                 />
-            </div>;
-        })
+    renderGroup(groupName) {
+        return (
+            <div key={groupName}>
+                <h5
+                    onClick={this.toggleExpandCollapse.bind(null, groupName)}
+                    className={this.state.expanded[groupName] ? 'collapsed' : 'expanded'}
+                    style={{'cursor': 'pointer'}}
+                >{groupName || 'COGS'}</h5>
+
+                {/* Render group rows. */}
+                {
+                    this.state.forecast[groupName].map(c => (
+                        <ForecastGroup
+                            key={c.Id}
+                            row={c}
+                            scenario={this.state.scenario}
+                            handleChange={this.handleChange}
+                            expanded={this.state.expanded[groupName]}
+                        />
+                    ))
+                }
+            </div>
+        );
     }
 
     componentWillMount() {
@@ -213,10 +218,10 @@ class Forecast extends React.Component {
                         <div className='col col-sm-2 pull-left text-right'></div>
                         <div className='col col-sm-1 pull-left text-right'>% +/-</div>
                     </div>
-                    {this.renderGroup('Gross Revenue')}
-                    {this.renderGroup('')}
-                    {this.renderGroup('Sales, General, Admin Expenses')}
-                    {this.renderGroup('Non-Operating')}
+                    {
+                        ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
+                        .map(this.renderGroup.bind(this))
+                    }
                 </div>
 
                 <input onClick={() => {}} type='button' className='actionButton' value='Save' />

@@ -33,49 +33,36 @@ class Percentage extends React.Component {
 }
 
 const ForecastGroup = props => {
-    const styles = {
-        childRow: {
-            fontSize: '16px'
-        }
-    }
-
-    const renderRow = () => {
-        const pastClass1 = classNames({
-            'col': true,
-            'col-sm-1': true,
-            'pull-left': true,
-            'text-right': true,
-            'd-none': props.pastVisible
-        });
-        const pastClass2 = classNames({
-            'col': true,
-            'col-sm-2': true,
-            'pull-left': true,
-            'text-right': true,
-            'd-none': props.pastVisible
-        });
-
-//        if (props.visible && props.visible === true) {
-            return <div style={styles.childRow} key={props.row.Id} className="row">
-                <div className="col col-sm-2">{props.row.LineItem}</div>
-                <div className={pastClass2}><Currency value={props.row.CurrentStartAmount + ''} /></div>
-                <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.CurrentEndAmount + ''} /></div>
-                <div className={pastClass1}><Percent value={props.row.ForecastPercentChange + ''} /></div>
-                <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.ForecastAmount + ''} /></div>
-                <div className="col col-sm-1 pull-left text-right"><Percent value={props.row.ForecastPercentChange + ''} /></div>
-                <Percentage
-                    handleChange={props.handleChange}
-                    scenario={props.scenario}
-                    row={props.row}
-                />
-            </div>;
-//        }
-//        return <div></div>
-    }
+    const pastClass1 = classNames({
+        'col': true,
+        'col-sm-1': true,
+        'pull-left': true,
+        'text-right': true,
+        'd-none': props.pastVisible
+    });
+    const pastClass2 = classNames({
+        'col': true,
+        'col-sm-2': true,
+        'pull-left': true,
+        'text-right': true,
+        'd-none': props.pastVisible
+    });
 
     return (
-        <div>{renderRow()}</div>
-    )
+        <div key={props.row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
+            <div className="col col-sm-2">{props.row.LineItem}</div>
+            <div className={pastClass2}><Currency value={props.row.CurrentStartAmount + ''} /></div>
+            <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.CurrentEndAmount + ''} /></div>
+            <div className={pastClass1}><Percent value={props.row.ForecastPercentChange + ''} /></div>
+            <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.ForecastAmount + ''} /></div>
+            <div className="col col-sm-1 pull-left text-right"><Percent value={props.row.ForecastPercentChange + ''} /></div>
+            <Percentage
+                handleChange={props.handleChange}
+                scenario={props.scenario}
+                row={props.row}
+            />
+        </div>
+    );
 }
 
 export default ForecastGroup;
