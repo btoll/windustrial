@@ -3,6 +3,7 @@ import axios from 'axios';
 import classNames from 'classnames';
 import { FaCaretUp, FaCaretRight, FaCaretLeft, FaCaretDown } from 'react-icons/lib/fa';
 
+import { SCENARIO_ENDPOINT_BASE } from './config';
 import ForecastGroup from './ForecastGroup';
 import ForecastHeader from '../components/ForecastHeader';
 
@@ -32,7 +33,12 @@ class Forecast extends React.Component {
             },
             pastVisible: true,
 
-            scenario: {},
+            overrides: {
+                percentage: {}
+            },
+
+            selected: {},
+            scenarios: [],
             forecast: {
                 'Gross Revenue': [],
                 'Non-Operating': [],
@@ -78,7 +84,8 @@ class Forecast extends React.Component {
         }
 
         this.actionChange = this.actionChange.bind(this);
-        this.handleChange = this.handleChange.bind(this);
+        this.handlePercentageChange = this.handlePercentageChange.bind(this);
+        this.handleScenarioChange = this.handleScenarioChange.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
@@ -91,21 +98,54 @@ class Forecast extends React.Component {
         }
     }
 
-    handleChange(scenario, row, e) {
-        if (e.target.value * 1) {
-            axios.post(`http://localhost:3001/api/scenario/${scenario.name}/${scenario.description}/${scenario.monthEnd}`, {
-                rowId: row.Id,
-                percent: e.target.value / 100
-            })
-            .then(res => {
-                this.setState({
-                    forecast: getForecastGroups(res.data.ScenarioForecasts)
-                });
-            })
-            .catch(console.log);
+    handlePercentageChange(scenario, row, e) {
+        const overrides = Object.assign({}, this.state.overrides);
 
-            this.setState({dirty: true});
+        // This will catch "0", "0.0", "" and NaN.
+        if (!(e.target.value * 1)) {
+            delete overrides.percentage[row.Id];
+        } else {
+            overrides.percentage[row.Id] = e.target.value / 100;
         }
+
+        axios.post(`${SCENARIO_ENDPOINT_BASE}/${scenario.id}`, {
+            overrides: overrides
+        })
+        .then(res => {
+            this.setState({
+                forecast: getForecastGroups(res.data.ScenarioForecasts)
+            });
+        })
+        .catch(console.log);
+
+        this.setState({
+            overrides: overrides,
+            dirty: true
+        });
+    }
+
+    handleScenarioChange(e) {
+        // Now get a specific scenario.
+        axios.get(`${SCENARIO_ENDPOINT_BASE}/${e.target.value}`)
+        .then(res => {
+            const data = res.data;
+            const forecasts = res.data.ScenarioForecasts;
+
+            this.setState({
+                selected: {
+                    id: data.Id,
+                    createdDateTime: data.CreateDateTime,
+                    description: data.Description,
+                    LOB: data.LOB,
+                    monthEnd: data.CurrentEndDate,
+                    name: data.Name
+                },
+                forecast: getForecastGroups(forecasts)
+            });
+
+            this.closeModal();
+        })
+        .catch(console.log);
     }
 
     openModal(type, e) {
@@ -146,8 +186,8 @@ class Forecast extends React.Component {
                         <ForecastGroup
                             key={c.Id}
                             row={c}
-                            scenario={this.state.scenario}
-                            handleChange={this.handleChange}
+                            scenario={this.state.selected}
+                            handlePercentageChange={this.handlePercentageChange}
                             expanded={this.state.expanded[groupName]}
                         />
                     ))
@@ -157,23 +197,13 @@ class Forecast extends React.Component {
     }
 
     componentWillMount() {
-        axios.get('http://localhost:3001/api/scenario/42')
-        .then(res => {
-            const data = res.data;
-            const forecasts = res.data.ScenarioForecasts;
-
+        // First, get all scenarios.
+        axios.get(`${SCENARIO_ENDPOINT_BASE}`)
+        .then(res =>
             this.setState({
-                scenario: {
-                    id: data.Id,
-                    createdDateTime: data.CreateDateTime,
-                    description: data.Description,
-                    LOB: data.LOB,
-                    monthEnd: data.CurrentEndDate,
-                    name: data.Name
-                },
-                forecast: getForecastGroups(forecasts)
-            });
-        })
+                scenarios: res.data
+            })
+        )
         .catch(console.log);
     }
 
@@ -194,8 +224,10 @@ class Forecast extends React.Component {
             <div>
                 <ForecastHeader
                     modal={this.state.modal}
-                    scenario={this.state.scenario}
+                    scenarios={this.state.scenarios}
+                    selected={this.state.selected}
 
+                    handleScenarioChange={this.handleScenarioChange}
                     actionChange={this.actionChange}
                     closeModal={this.closeModal}
                     openModal={this.openModal}

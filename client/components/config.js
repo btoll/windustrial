@@ -1,12 +1,10 @@
-const protocol = 'http://';
-const host = 'localhost';
-const port = '3000';
+const PROTOCOL = 'https://';
+const HOST = 'corelyticsbftapi.azurewebsites.net';
+const PORT = '443';
 
-const SOCKET = `${protocol}${host}:${port}`;
-const LOGIN_URL = `${SOCKET}/login`;
-const PRODUCTS_URL = `${SOCKET}/products`;
-const RECEIPTS_URL = `${SOCKET}/receipts`;
-const STORES_URL =  `${SOCKET}/stores`;
+const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
+const ENDPOINT = 'api/scenario';
+const SCENARIO_ENDPOINT_BASE = `${SOCKET}/${ENDPOINT}`;
 
 const PERCENTAGES = [3, 5, 7, 9];
 
@@ -22,15 +20,9 @@ const incr = (i =>
     () => i.next().value
 )(incrementer());
 
-//export {
-//    LOGIN_URL,
-//    PRODUCTS_URL,
-//    RECEIPTS_URL,
-//    STORES_URL,
-//    incr
-//};
-
 export {
-    PERCENTAGES
+    PERCENTAGES,
+    SCENARIO_ENDPOINT_BASE,
+    SOCKET
 };
 

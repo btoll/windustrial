@@ -23,7 +23,7 @@ const styles = {
 
 function InfoHeader(props) {
     return (
-        <form id="infoHeader">
+        <form id="infoForm">
             <div>
                 <label>Scenario Name</label>
                 <input value={props.scenario.name} />
@@ -54,14 +54,31 @@ function InfoHeader(props) {
 
 function Actions(props) {
     return (
-        <select onChange={props.onActionChange} id="actionsList">
-            <option>Select an action</option>
-            <option>Build a new scenario</option>
-            <option>Retrive a saved scenario</option>
-            <option>Update saved scenario</option>
-            <option>Evaluate performance</option>
-            <option>Build Overrides</option>
-        </select>
+        <form id="actionsForm">
+            <div>
+                <button>Build a new scenario</button>
+            </div>
+            <div>
+                <label>Retrieve a saved scenario</label>
+                <select onChange={props.onScenarioChange}>
+                    <option value="0">Choose a scenario</option>
+                    {
+                        props.scenarios.map(scenario => (
+                            <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
+                        ))
+                    }
+                </select>
+            </div>
+            <div>
+                <button>Update saved scenario</button>
+            </div>
+            <div>
+                Evaluate performance
+            </div>
+            <div>
+                Build Overrides
+            </div>
+        </form>
     );
 }
 
@@ -81,7 +98,7 @@ class ForecastHeader extends React.Component {
 
                 <p>
                     <span style={styles.labelStyle}>Scenario Name:</span>
-                    <span style={styles.textStyle}>{this.props.scenario.name}</span>
+                    <span style={styles.textStyle}>{this.props.selected.name}</span>
                     <button
                         onClick={this.props.openModal.bind(null, 'infoModal')}
                         style={styles.textStyle}
@@ -100,12 +117,16 @@ class ForecastHeader extends React.Component {
                         {this.props.modal.type === 'infoModal' ?
                             <div>
                                 <button onClick={this.props.closeModal}>Close and Save</button>
-                                <InfoHeader scenario={this.props.scenario} />
+                                <InfoHeader scenario={this.props.selected} />
                             </div>
                         :
                             <div>
                                 <button onClick={this.props.closeModal}>Close</button>
-                                <Actions onActionChange={this.props.actionChange} />
+                                <Actions
+                                    scenarios={this.props.scenarios}
+                                    onScenarioChange={this.props.handleScenarioChange}
+                                    onActionChange={this.props.actionChange}
+                                />
                             </div>
 
                         }

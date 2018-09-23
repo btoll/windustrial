@@ -66,11 +66,11 @@ body {
     height: 500px;
     width: 600px;
 }
-#infoHeader {
+#infoForm {
     margin: 40px;
     padding: 10px;
 }
-#infoHeader label {
+#infoForm label {
     background-color: antiquewhite;
     font-weight: bold;
     margin-right: 2em;
@@ -82,10 +82,10 @@ body {
 /* Actions modal on Forecast page */
 .actionsModal {
     height: 300px;
-    width: 300px;
+    width: 500px;
 }
-#actionsList {
-    margin: 20px;
+#actionsForm {
+    margin-top: 40px;
 }
 /**/
 

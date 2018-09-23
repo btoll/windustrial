@@ -16,16 +16,16 @@ class Percentage extends React.Component {
     render() {
         return (
             <div>
-                <select onChange={this.props.handleChange.bind(null, this.props.scenario, this.props.row)}>
-                    <option>Choose a percentage</option>
+                <select onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row)}>
+                    <option key="0" value="0">Choose a percentage</option>
                     {PERCENTAGES.map(n =>
-                        <option key={n} value={n/100}>{n}</option>
+                        <option key={n+1} value={n}>{n}</option>
                     )}
                 </select>
                 <input
                     className="Percentage-custom"
                     type="text"
-                    onChange={this.props.handleChange.bind(null, this.props.scenario, this.props.row)}
+                    onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row)}
                 />
             </div>
         );
@@ -57,7 +57,7 @@ const ForecastGroup = props => {
             <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.ForecastAmount + ''} /></div>
             <div className="col col-sm-1 pull-left text-right"><Percent value={props.row.ForecastPercentChange + ''} /></div>
             <Percentage
-                handleChange={props.handleChange}
+                handlePercentageChange={props.handlePercentageChange}
                 scenario={props.scenario}
                 row={props.row}
             />

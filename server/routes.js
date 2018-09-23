@@ -7,27 +7,54 @@ module.exports = app => {
     });
 
     app.get('/api/scenario', (req, res, next) => {
-        // TODO
+        res.send(mockGetAll);
         next();
     });
 
     app.get('/api/scenario/:id', (req, res, next) => {
-        res.send(mockGET);
+        res.send(Object.assign({}, mockGetOne(req.params.id)));
         next();
     });
 
     app.post('/api/scenario/:scenarioName/:scenarioDescription/:monthEnd', (req, res, next) => {
-        res.send(Object.assign({}, mockGET));
+        res.send(Object.assign({}, mockGetOne("f72a2e67-8d3b-429c-a630-19d75e01ae80")));
         next();
     });
 
+    app.post('/api/scenario/:scenarioId', (req, res, next) => {
+        res.send(Object.assign({}, mockGetOne(req.params.scenarioId)));
+        next();
+    });
 }
 
-const mockGET = {
-    "Id": "f72a2e67-8d3b-429c-a630-19d75e01ae82",
+const mockGetAll = [
+    {
+        "Id": "f72a2e67-8d3b-429c-a630-19d75e01ae80",
+        "Name": "Foo",
+        "Description": "Foo Scenario"
+    },
+    {
+        "Id": "f72a2e67-8d3b-429c-a630-19d75e01ae81",
+        "Name": "Bar",
+        "Description": "Bar Scenario"
+    },
+    {
+        "Id": "f72a2e67-8d3b-429c-a630-19d75e01ae82",
+        "Name": "Quux",
+        "Description": "Quux Scenario"
+    },
+    {
+        "Id": "f72a2e67-8d3b-429c-a630-19d75e01ae83",
+        "Name": "Derp",
+        "Description": "Derp Scenario"
+    }
+];
+
+const mockGetOne = id => ({
+    "Id": id,
     "CompanyId": "8ff74834-8023-4c8c-bf69-ca97e797c69d",
-    "Name": "test",
-    "Description": "test desciption",
+    "Name": mockGetAll.filter(n => id === n.Id)[0].Name,
+    "Description": mockGetAll.filter(n => id === n.Id)[0].Description,
     "LOB": null,
     "ControlDate": null,
     "CurrentStartDate": null,
@@ -561,5 +588,5 @@ const mockGET = {
     ],
     "ScenarioForecastOptions": [],
     "ScenarioOverrides": []
-};
+});
 
