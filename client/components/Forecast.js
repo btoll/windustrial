@@ -8,10 +8,24 @@ import ForecastGroup from './ForecastGroup';
 import ForecastHeader from '../components/ForecastHeader';
 
 const getForecastGroups = data => ({
-    'Gross Revenue': data.filter(d => d.GroupName === 'Gross Revenue'),
-    'Non-Operating': data.filter(d => d.GroupName === 'Non-Operating'),
-    'Sales, General, Admin Expenses': data.filter(d => !!~d.GroupName.indexOf('Sales')),
-    '': data.filter(d => !d.GroupName) // COGS
+    'Gross Revenue': {
+        data: data.filter(d => d.GroupName === 'Gross Revenue'),
+        rows: [7, 8, 9]
+    },
+    'Non-Operating': {
+        data: data.filter(d => d.GroupName === 'Non-Operating'),
+        rows: [45, 46]
+    },
+    'Sales, General, Admin Expenses': {
+        data: data.filter(d => !!~d.GroupName.indexOf('Sales')),
+        rows: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    },
+    // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
+    // ...should it be its own group?
+    '': {
+        data: data.filter(d => !d.GroupName), // COGS
+        rows: [12, 13, 14, 15, 16, 17]
+    },
 });
 
 class Forecast extends React.Component {
@@ -20,12 +34,6 @@ class Forecast extends React.Component {
 
         this.state = {
             expanded: {
-//                'Gross Revenue': false,
-//                'COGS Total': false,
-//                'Gross Margin': false,
-//                'Sales, General & Admin': false,
-//                'Profit': false,
-//                'Non Operating': false
                 'Gross Revenue': false,
                 'Non-Operating': false,
                 'Sales, General, Admin Expenses': false,
@@ -98,7 +106,7 @@ class Forecast extends React.Component {
         }
     }
 
-    handlePercentageChange(scenario, row, e) {
+    handlePercentageChange(scenario, row, rowNum, e) {
         const overrides = Object.assign({}, this.state.overrides);
 
         // This will catch "0", "0.0", "" and NaN.
@@ -172,8 +180,12 @@ class Forecast extends React.Component {
     }
 
     renderGroup(groupName) {
+        const group = this.state.forecast[groupName];
+        const groupData = group.data;
+        const groupRows = group.rows;
+
         return (
-            <div key={groupName}>
+            <div style={{'marginBottom': '30px'}} key={groupName}>
                 <h5
                     onClick={this.toggleExpandCollapse.bind(null, groupName)}
                     className={this.state.expanded[groupName] ? 'collapsed' : 'expanded'}
@@ -182,10 +194,11 @@ class Forecast extends React.Component {
 
                 {/* Render group rows. */}
                 {
-                    this.state.forecast[groupName].map(c => (
+                    groupData.map((c, i) => (
                         <ForecastGroup
                             key={c.Id}
                             row={c}
+                            rowNum={groupRows[i]}
                             scenario={this.state.selected}
                             handlePercentageChange={this.handlePercentageChange}
                             expanded={this.state.expanded[groupName]}
