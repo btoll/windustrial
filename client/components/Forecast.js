@@ -220,6 +220,7 @@ class Forecast extends React.Component {
             'pull-left': true,
             'text-right': true
         });
+
         return (
             <div>
                 <ForecastHeader
@@ -251,8 +252,10 @@ class Forecast extends React.Component {
                         <div className='col col-sm-1 pull-left text-right'>% +/-</div>
                     </div>
                     {
-                        ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
-                        .map(this.renderGroup.bind(this))
+                        Object.keys(this.state.selected).length ?
+                            ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
+                            .map(this.renderGroup.bind(this))
+                        : <div style={{'display': 'none'}}></div>
                     }
                 </div>
 

@@ -1,6 +1,6 @@
-const PROTOCOL = 'https://';
-const HOST = 'corelyticsbftapi.azurewebsites.net';
-const PORT = '443';
+const PROTOCOL = 'http://';
+const HOST = 'localhost';
+const PORT = '3001';
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
 const ENDPOINT = 'api/scenario';

@@ -101,6 +101,7 @@ class ForecastHeader extends React.Component {
                     <span style={styles.textStyle}>{this.props.selected.name}</span>
                     <button
                         onClick={this.props.openModal.bind(null, 'infoModal')}
+                        disabled={!Object.keys(this.props.selected).length}
                         style={styles.textStyle}
                     >info
                     </button>
@@ -116,7 +117,7 @@ class ForecastHeader extends React.Component {
                     >
                         {this.props.modal.type === 'infoModal' ?
                             <div>
-                                <button onClick={this.props.closeModal}>Close and Save</button>
+                                <button onClick={this.props.closeModal}>Update and Close</button>
                                 <InfoHeader scenario={this.props.selected} />
                             </div>
                         :
