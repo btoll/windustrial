@@ -3,7 +3,7 @@ import axios from 'axios';
 import classNames from 'classnames';
 import { FaCaretUp, FaCaretRight, FaCaretLeft, FaCaretDown } from 'react-icons/lib/fa';
 
-import { SCENARIO_ENDPOINT_BASE } from './config';
+import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 import ForecastGroup from './ForecastGroup';
 import ForecastHeader from '../components/ForecastHeader';
 
@@ -25,7 +25,7 @@ const getForecastGroups = data => ({
     '': {
         data: data.filter(d => !d.GroupName), // COGS
         rows: [12, 13, 14, 15, 16, 17]
-    },
+    }
 });
 
 class Forecast extends React.Component {
@@ -33,6 +33,7 @@ class Forecast extends React.Component {
         super(props);
 
         this.state = {
+            authToken: '',
             dirty: false,
             expanded: {
                 'Gross Revenue': false,
@@ -144,15 +145,15 @@ class Forecast extends React.Component {
             method: 'put',
             url: `${SCENARIO_ENDPOINT_BASE}/${scenario.Id}`,
             headers: {
-                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+                'AuthorizationToken': this.state.authToken
             },
             data: req
         })
-        .then(res => {
+        .then(res =>
             this.setState({
                 forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            });
-        })
+            })
+        )
         .catch(console.log);
 
         this.setState({
@@ -167,7 +168,7 @@ class Forecast extends React.Component {
             method: 'get',
             url: `${SCENARIO_ENDPOINT_BASE}/${e.target.value}`,
             headers: {
-                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+                'AuthorizationToken': this.state.authToken
             }
         })
         .then(res => {
@@ -186,6 +187,7 @@ class Forecast extends React.Component {
                 })(),
                 forecastGroups: getForecastGroups(data.ScenarioForecasts)
             });
+            debugger;
 
             this.closeModal();
         })
@@ -245,16 +247,31 @@ class Forecast extends React.Component {
         );
     }
 
-    componentWillMount() {
+    componentDidMount() {
         // First, get all scenarios.
         axios({
-            method: 'get',
-            url: SCENARIO_ENDPOINT_BASE,
-            headers: {
-                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+            method: 'post',
+            url: AUTH,
+            auth: {
+                username: 'general@demo.com',
+                password: '4Testing$'
             }
         })
-        .then(res =>
+        .then(res => {
+            const authToken = res.headers.authorizationtoken;
+
+            this.setState({
+                authToken: authToken
+            });
+
+            return axios({
+                method: 'get',
+                url: SCENARIO_ENDPOINT_BASE,
+                headers: {
+                    'AuthorizationToken': authToken
+                }
+            })
+        }).then(res =>
             this.setState({
                 scenarios: res.data
             })

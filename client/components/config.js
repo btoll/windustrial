@@ -1,8 +1,9 @@
-const PROTOCOL = 'http://';
-const HOST = 'localhost';
-const PORT = '3001';
+const PROTOCOL = 'https://';
+const HOST = 'corelyticsbftapi.azurewebsites.net';
+const PORT = '443';
 
 const SOCKET = `${PROTOCOL}${HOST}:${PORT}`;
+const AUTH = `${SOCKET}/api/users/login`;
 const ENDPOINT = 'api/scenario';
 const SCENARIO_ENDPOINT_BASE = `${SOCKET}/${ENDPOINT}`;
 
@@ -26,6 +27,7 @@ const incr = (i =>
 )(incrementer());
 
 export {
+    AUTH,
     PERCENTAGES,
     SCENARIO_ENDPOINT_BASE,
     SOCKET
