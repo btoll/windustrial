@@ -17,7 +17,7 @@ const getForecastGroups = data => ({
         rows: [45, 46]
     },
     'Sales, General, Admin Expenses': {
-        data: data.filter(d => !!~d.GroupName.indexOf('Sales')),
+        data: data.filter(d => d.GroupName.includes('Sales')),
         rows: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
     },
     // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
@@ -33,21 +33,14 @@ class Forecast extends React.Component {
         super(props);
 
         this.state = {
+            dirty: false,
             expanded: {
                 'Gross Revenue': false,
                 'Non-Operating': false,
                 'Sales, General, Admin Expenses': false,
                 '': false
             },
-            pastVisible: true,
-
-            overrides: {
-                percentage: {}
-            },
-
-            selected: {},
-            scenarios: [],
-            forecast: {
+            forecastGroups: {
                 'Gross Revenue': [],
                 'Non-Operating': [],
                 'Sales, General, Admin Expenses': [],
@@ -57,7 +50,9 @@ class Forecast extends React.Component {
                 show: false,
                 type: null
             },
-            dirty: false
+            percentages: [],
+            scenarios: [],
+            selected: {}
         }
 
         this.styles = {
@@ -107,48 +102,89 @@ class Forecast extends React.Component {
     }
 
     handlePercentageChange(scenario, row, rowNum, e) {
-        const overrides = Object.assign({}, this.state.overrides);
+        const target = e.target;
+        let percentages = this.state.percentages.concat();
+        let col, value;
 
-        // This will catch "0", "0.0", "" and NaN.
-        if (!(e.target.value * 1)) {
-            delete overrides.percentage[row.Id];
+        if (target.dataset.col) {
+            col = target.dataset.col;
+            value = target.value;
         } else {
-            overrides.percentage[row.Id] = e.target.value / 100;
+            [col, value] = JSON.parse(target.value);
         }
 
-        axios.post(`${SCENARIO_ENDPOINT_BASE}/${scenario.id}`, {
-            overrides: overrides
+        // This will catch "0", "0.0", "" and NaN.
+        if (!(value * 1)) {
+            percentages = percentages.filter(p => p.Id !== row.Id);
+        } else {
+            let found = false;
+
+            percentages = percentages.map(p => {
+                if (p.Id === row.Id) {
+                    found = true;
+                    p.Value = value / 100;
+                }
+                return p;
+            });
+
+            if (!found) {
+                percentages.push({
+                    Id: row.Id,
+                    ColumnName: col,
+                    RowNumber: rowNum,
+                    Value: value / 100
+                });
+            }
+        }
+
+        const req = Object.assign({}, scenario);
+        req.ScenarioForecastOptions = percentages;
+
+        axios({
+            method: 'put',
+            url: `${SCENARIO_ENDPOINT_BASE}/${scenario.Id}`,
+            headers: {
+                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+            },
+            data: req
         })
         .then(res => {
             this.setState({
-                forecast: getForecastGroups(res.data.ScenarioForecasts)
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
             });
         })
         .catch(console.log);
 
         this.setState({
-            overrides: overrides,
+            percentages: percentages,
             dirty: true
         });
     }
 
     handleScenarioChange(e) {
         // Now get a specific scenario.
-        axios.get(`${SCENARIO_ENDPOINT_BASE}/${e.target.value}`)
+        axios({
+            method: 'get',
+            url: `${SCENARIO_ENDPOINT_BASE}/${e.target.value}`,
+            headers: {
+                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+            }
+        })
         .then(res => {
             const data = res.data;
-            const forecasts = res.data.ScenarioForecasts;
+            const blacklistedKeys = ['ScenarioForecasts', 'ScenarioForecastOptions', 'ScenarioOverrides'];
 
             this.setState({
-                selected: {
-                    id: data.Id,
-                    createdDateTime: data.CreateDateTime,
-                    description: data.Description,
-                    LOB: data.LOB,
-                    monthEnd: data.CurrentEndDate,
-                    name: data.Name
-                },
-                forecast: getForecastGroups(forecasts)
+                selected: (() => {
+                    const o = {};
+                    for (const key of Object.keys(data)) {
+                        if (!blacklistedKeys.includes(key)) {
+                            o[key] = data[key];
+                        }
+                    }
+                    return o;
+                })(),
+                forecastGroups: getForecastGroups(data.ScenarioForecasts)
             });
 
             this.closeModal();
@@ -180,7 +216,7 @@ class Forecast extends React.Component {
     }
 
     renderGroup(groupName) {
-        const group = this.state.forecast[groupName];
+        const group = this.state.forecastGroups[groupName];
         const groupData = group.data;
         const groupRows = group.rows;
 
@@ -211,7 +247,13 @@ class Forecast extends React.Component {
 
     componentWillMount() {
         // First, get all scenarios.
-        axios.get(`${SCENARIO_ENDPOINT_BASE}`)
+        axios({
+            method: 'get',
+            url: SCENARIO_ENDPOINT_BASE,
+            headers: {
+                'AuthorizationToken': '/O4upK1vRRLiB+9i27t+6ESKTN9lwMXuIOcx4097nK7PgubEbNPrCQ1GzuOUBQGHFsWR/WACXhdJ9vTtAg7NaNkT/+WmCL4LdzocmgGkSFc='
+            }
+        })
         .then(res =>
             this.setState({
                 scenarios: res.data

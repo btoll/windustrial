@@ -17,15 +17,15 @@ class Percentage extends React.Component {
         return (
             <div>
                 <select onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row, this.props.rowNum)}>
-                    <option key="0" value="0">Choose a percentage</option>
+                    <option key="0" value="[0, 0]">Choose a percentage</option>
                     {PERCENTAGES.map(o =>
-                        <option key={o.val + 1} value={o.val} col={o.col}>{o.val}</option>
+                        <option key={o.val} value={`["${o.col}", ${o.val}]`} col={o.col}>{o.val}</option>
                     )}
                 </select>
                 <input
                     className="Percentage-custom"
                     type="text"
-                    col="U"
+                    data-col="U"
                     onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row, this.props.rowNum)}
                 />
             </div>

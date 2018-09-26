@@ -26,15 +26,15 @@ function InfoHeader(props) {
         <form id="infoForm">
             <div>
                 <label>Scenario Name</label>
-                <input value={props.scenario.name} />
+                <input value={props.scenario.Name} />
             </div>
             <div>
                 <label>Target Timeframe</label>
-                <span>{props.scenario.name}</span>
+                <span>{props.scenario.Name}</span>
             </div>
             <div>
                 <label>Date Created</label>
-                <span>{props.scenario.createdDateTime}</span>
+                <span>{props.scenario.CreatedDateTime}</span>
             </div>
             <div>
                 <label>Line of Business</label>
@@ -42,11 +42,11 @@ function InfoHeader(props) {
             </div>
             <div>
                 <label>Revenue Center</label>
-                <span>{props.scenario.name}</span>
+                <span>{props.scenario.Name}</span>
             </div>
             <div>
                 <label>Scenario Builder</label>
-                <span>{props.scenario.name}</span>
+                <span>{props.scenario.Name}</span>
             </div>
         </form>
     );
@@ -98,7 +98,7 @@ class ForecastHeader extends React.Component {
 
                 <p>
                     <span style={styles.labelStyle}>Scenario Name:</span>
-                    <span style={styles.textStyle}>{this.props.selected.name}</span>
+                    <span style={styles.textStyle}>{this.props.selected.Name}</span>
                     <button
                         onClick={this.props.openModal.bind(null, 'infoModal')}
                         disabled={!Object.keys(this.props.selected).length}

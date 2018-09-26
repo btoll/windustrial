@@ -1,9 +1,10 @@
 module.exports = app => {
     // For CORS.
     app.use(function(req, res, next) {
-          res.header("Access-Control-Allow-Origin", "*");
-          res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-          next();
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, AuthorizationToken");
+        res.header("Access-Control-Allow-Methods", "GET,HEAD,POST,PUT");
+        next();
     });
 
     app.get('/api/scenario', (req, res, next) => {
@@ -21,7 +22,7 @@ module.exports = app => {
         next();
     });
 
-    app.post('/api/scenario/:scenarioId', (req, res, next) => {
+    app.put('/api/scenario/:scenarioId', (req, res, next) => {
         res.send(Object.assign({}, mockGetOne(req.params.scenarioId)));
         next();
     });
