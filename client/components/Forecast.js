@@ -102,7 +102,7 @@ class Forecast extends React.Component {
         }
     }
 
-    handlePercentageChange(scenario, row, rowNum, e) {
+    handlePercentageChange(row, rowNum, e) {
         const target = e.target;
         let percentages = this.state.percentages.concat();
         let col, value;
@@ -111,6 +111,7 @@ class Forecast extends React.Component {
             col = target.dataset.col;
             value = target.value;
         } else {
+            // TODO: Error checking!
             [col, value] = JSON.parse(target.value);
         }
 
@@ -138,12 +139,12 @@ class Forecast extends React.Component {
             }
         }
 
-        const req = Object.assign({}, scenario);
+        const req = Object.assign({}, this.state.selected);
         req.ScenarioForecastOptions = percentages;
 
         axios({
             method: 'put',
-            url: `${SCENARIO_ENDPOINT_BASE}/${scenario.Id}`,
+            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selected.Id}`,
             headers: {
                 'AuthorizationToken': this.state.authToken
             },
@@ -187,7 +188,6 @@ class Forecast extends React.Component {
                 })(),
                 forecastGroups: getForecastGroups(data.ScenarioForecasts)
             });
-            debugger;
 
             this.closeModal();
         })
@@ -237,7 +237,6 @@ class Forecast extends React.Component {
                             key={c.Id}
                             row={c}
                             rowNum={groupRows[i]}
-                            scenario={this.state.selected}
                             handlePercentageChange={this.handlePercentageChange}
                             expanded={this.state.expanded[groupName]}
                         />

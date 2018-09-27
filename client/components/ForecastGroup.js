@@ -8,15 +8,33 @@ class Percentage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            custom: null,
-            selected: null
+            custom: '',
+            selected: ''
         }
+
+        this.onSelected = this.onSelected.bind(this);
+    }
+
+    onSelected(e) {
+        if (e.target.nodeName === 'SELECT') {
+            this.setState({
+                custom: '',
+                selected: e.target.value
+            });
+        } else {
+            this.setState({
+                custom: e.target.value,
+                selected: ''
+            });
+        }
+
+        this.props.handlePercentageChange(e, this.props.row, this.props.rowNum)
     }
 
     render() {
         return (
             <div>
-                <select onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row, this.props.rowNum)}>
+                <select value={this.state.selected} onChange={this.onSelected}>
                     <option key="0" value="[0, 0]">Choose a percentage</option>
                     {PERCENTAGES.map(o =>
                         <option key={o.val} value={`["${o.col}", ${o.val}]`} col={o.col}>{o.val}</option>
@@ -26,7 +44,8 @@ class Percentage extends React.Component {
                     className="Percentage-custom"
                     type="text"
                     data-col="U"
-                    onChange={this.props.handlePercentageChange.bind(null, this.props.scenario, this.props.row, this.props.rowNum)}
+                    value={this.state.custom}
+                    onChange={this.onSelected}
                 />
             </div>
         );
@@ -65,7 +84,6 @@ const ForecastGroup = props => {
                 displayPercentages ?
                     <Percentage
                         handlePercentageChange={props.handlePercentageChange}
-                        scenario={props.scenario}
                         row={props.row}
                         rowNum={props.rowNum}
                     />
