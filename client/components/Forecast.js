@@ -94,6 +94,7 @@ class Forecast extends React.Component {
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
         this.createScenario = this.createScenario.bind(this);
+        this.updateScenarioInfo = this.updateScenarioInfo.bind(this);
         this.handleScenarioChange = this.handleScenarioChange.bind(this);
     }
 
@@ -176,6 +177,31 @@ class Forecast extends React.Component {
             headers: {
                 'AuthorizationToken': this.state.authToken
             }
+        })
+        .then(res =>
+            this.setState({
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+            })
+        )
+        .catch(console.log);
+
+        this.closeModal();
+    }
+
+    updateScenarioInfo(e) {
+        e.preventDefault();
+
+        const req = Object.assign({}, this.state.selected);
+        const formData = new FormData(e.target);
+        req.Name = formData.get('scenarioName');
+
+        axios({
+            method: 'put',
+            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selected.Id}`,
+            headers: {
+                'AuthorizationToken': this.state.authToken
+            },
+            data: req
         })
         .then(res =>
             this.setState({
@@ -328,6 +354,7 @@ class Forecast extends React.Component {
                     openModal={this.openModal}
 
                     createScenario={this.createScenario}
+                    updateScenarioInfo={this.updateScenarioInfo}
                     handleScenarioChange={this.handleScenarioChange}
                 />
 

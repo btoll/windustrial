@@ -58,8 +58,11 @@ class ForecastHeader extends React.Component {
                     >
                         {this.props.modal.type === 'infoModal' ?
                             <div>
-                                <button onClick={this.props.closeModal}>Update and Close</button>
-                                <Info scenario={this.props.selected} />
+                                <button onClick={this.props.closeModal}>Close</button>
+                                <Info
+                                    scenario={this.props.selected}
+                                    onUpdateScenarioInfo={this.props.updateScenarioInfo}
+                                />
                             </div>
                         :
                             <div>
