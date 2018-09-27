@@ -89,10 +89,12 @@ class Forecast extends React.Component {
 
         this.actionChange = this.actionChange.bind(this);
         this.handlePercentageChange = this.handlePercentageChange.bind(this);
-        this.handleScenarioChange = this.handleScenarioChange.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
+
+        this.createScenario = this.createScenario.bind(this);
+        this.handleScenarioChange = this.handleScenarioChange.bind(this);
     }
 
     actionChange(e) {
@@ -161,6 +163,28 @@ class Forecast extends React.Component {
             percentages: percentages,
             dirty: true
         });
+    }
+
+    createScenario(e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+
+        axios({
+            method: 'post',
+            url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
+            headers: {
+                'AuthorizationToken': this.state.authToken
+            }
+        })
+        .then(res =>
+            this.setState({
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+            })
+        )
+        .catch(console.log);
+
+        this.closeModal();
     }
 
     handleScenarioChange(e) {
@@ -299,10 +323,12 @@ class Forecast extends React.Component {
                     scenarios={this.state.scenarios}
                     selected={this.state.selected}
 
-                    handleScenarioChange={this.handleScenarioChange}
                     actionChange={this.actionChange}
                     closeModal={this.closeModal}
                     openModal={this.openModal}
+
+                    createScenario={this.createScenario}
+                    handleScenarioChange={this.handleScenarioChange}
                 />
 
                 <div className='container-fluid'>

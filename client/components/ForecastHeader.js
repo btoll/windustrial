@@ -2,6 +2,8 @@ import React from 'react';
 import ReactModal from 'react-modal';
 
 import ForecastModal from './ForecastModal';
+import Actions from './modal/Actions';
+import Info from './modal/Info';
 
 const styles = {
     container: {
@@ -19,67 +21,6 @@ const styles = {
         color: 'grey',
         fontSize: '24px'
     }
-}
-
-function InfoHeader(props) {
-    return (
-        <form id="infoForm">
-            <div>
-                <label>Scenario Name</label>
-                <input value={props.scenario.Name} />
-            </div>
-            <div>
-                <label>Target Timeframe</label>
-                <span>{props.scenario.Name}</span>
-            </div>
-            <div>
-                <label>Date Created</label>
-                <span>{props.scenario.CreatedDateTime}</span>
-            </div>
-            <div>
-                <label>Line of Business</label>
-                <span>{props.scenario.LOB}</span>
-            </div>
-            <div>
-                <label>Revenue Center</label>
-                <span>{props.scenario.Name}</span>
-            </div>
-            <div>
-                <label>Scenario Builder</label>
-                <span>{props.scenario.Name}</span>
-            </div>
-        </form>
-    );
-}
-
-function Actions(props) {
-    return (
-        <form id="actionsForm">
-            <div>
-                <button>Build a new scenario</button>
-            </div>
-            <div>
-                <label>Retrieve a saved scenario</label>
-                <select onChange={props.onScenarioChange}>
-                    <option value="0">Choose a scenario</option>
-                    {
-                        props.scenarios.map(scenario => (
-                            <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
-                        ))
-                    }
-                </select>
-            </div>
-            <div>
-                <button>Update saved scenario</button>
-            </div>
-            <div>
-                Evaluate performance
-            </div>
-            <div>
-                Build Overrides
-            </div>
-        </form>
-    );
 }
 
 class ForecastHeader extends React.Component {
@@ -118,13 +59,14 @@ class ForecastHeader extends React.Component {
                         {this.props.modal.type === 'infoModal' ?
                             <div>
                                 <button onClick={this.props.closeModal}>Update and Close</button>
-                                <InfoHeader scenario={this.props.selected} />
+                                <Info scenario={this.props.selected} />
                             </div>
                         :
                             <div>
                                 <button onClick={this.props.closeModal}>Close</button>
                                 <Actions
                                     scenarios={this.props.scenarios}
+                                    onCreateScenario={this.props.createScenario}
                                     onScenarioChange={this.props.handleScenarioChange}
                                     onActionChange={this.props.actionChange}
                                 />
