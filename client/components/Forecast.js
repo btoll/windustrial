@@ -105,12 +105,13 @@ class Forecast extends React.Component {
         }
     }
 
-    handlePercentageChange(row, rowNum, e) {
+    handlePercentageChange(e, row, rowNum) {
         const target = e.target;
         let percentages = this.state.percentages.concat();
         let col, value;
 
-        if (target.dataset.col) {
+        // This guard *probably* isn't necessary, but you know, habit...   :)
+        if (target.dataset && target.dataset.col) {
             col = target.dataset.col;
             value = target.value;
         } else {
