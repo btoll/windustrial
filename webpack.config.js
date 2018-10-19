@@ -4,8 +4,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     // `babel-polyfill` is needed for the generator in config.js and MUST be first in the array!
-    entry: ['babel-polyfill', './client/index.js'],
+    entry: {
+        main: './client/index.js'
+    },
 
+    // TODO: Make sure we're code splitting.
+    // https://reactjs.org/docs/code-splitting.html
+    // https://gist.github.com/gaearon/ca6e803f5c604d37468b0091d9959269
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bft.js',

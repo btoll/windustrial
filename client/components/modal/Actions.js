@@ -16,7 +16,7 @@ function Actions(props) {
                     </div>
                     <div>
                         <label>Scenario Month End</label>
-                        <input type="text" name="scenarioMonthEnd" />
+                        <input type="text" name="scenarioMonthEnd" placeholder="YYYYMMDD" />
                     </div>
                     <div>
                         <label></label>

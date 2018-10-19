@@ -14,6 +14,7 @@ const PERCENTAGES = [
     {col: 'R', val: 7}
 ];
 
+/*
 function* incrementer() {
     let n = 100;
 
@@ -25,6 +26,7 @@ function* incrementer() {
 const incr = (i =>
     () => i.next().value
 )(incrementer());
+*/
 
 export {
     AUTH,

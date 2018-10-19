@@ -31,6 +31,61 @@ class ForecastHeader extends React.Component {
         ReactModal.setAppElement('#root');
     }
 
+    showModal() {
+        switch (this.props.modal.type) {
+            case 'actionsModal':
+                return (
+                    <ForecastModal
+                        className={`${this.props.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.props.onCloseModal}
+                        showModal={this.props.modal.show}
+                    >
+                        <div>
+                            <button onClick={this.props.closeModal}>Close</button>
+                            <Actions
+                                scenarios={this.props.scenarios}
+                                onCreateScenario={this.props.createScenario}
+                                onScenarioChange={this.props.handleScenarioChange}
+                                onActionChange={this.props.actionChange}
+                            />
+                        </div>
+                    </ForecastModal>
+
+                );
+
+            case 'infoModal':
+                return (
+                    <ForecastModal
+                        className={`${this.props.modal.type} ReactModal__Content__base`}
+                        onCloseModal={this.props.onCloseModal}
+                        showModal={this.props.modal.show}
+                    >
+                        <div>
+                            <button onClick={this.props.closeModal}>Close</button>
+                            <Info
+                                scenario={this.props.selected}
+                                onUpdateScenarioInfo={this.props.updateScenarioInfo}
+                            />
+                        </div>
+                    </ForecastModal>
+                );
+
+            case 'spinnerModal':
+                return (
+                    <ForecastModal
+                        className={`${this.props.modal.type} ReactModal__Content__base`}
+                        onCloseModal={() => {}}
+                        showModal={this.props.modal.show}
+                    >
+                        <div>
+                            <p>Please wait while we fetch the latest data...</p>
+                            <img src="/images/spinner.gif" alt="Spinner..." />
+                        </div>
+                    </ForecastModal>
+                );
+        }
+    }
+
     render() {
         return (
             <div style={styles.container}>
@@ -51,36 +106,12 @@ class ForecastHeader extends React.Component {
                 <input onClick={this.props.openModal.bind(null, 'actionsModal')} type='button' className='actionButton' value='Actions' />
 
                 {this.props.modal.show ?
-                    <ForecastModal
-                        className={`${this.props.modal.type} ReactModal__Content__base`}
-                        onCloseModal={this.props.onCloseModal}
-                        showModal={this.props.modal.show}
-                    >
-                        {this.props.modal.type === 'infoModal' ?
-                            <div>
-                                <button onClick={this.props.closeModal}>Close</button>
-                                <Info
-                                    scenario={this.props.selected}
-                                    onUpdateScenarioInfo={this.props.updateScenarioInfo}
-                                />
-                            </div>
-                        :
-                            <div>
-                                <button onClick={this.props.closeModal}>Close</button>
-                                <Actions
-                                    scenarios={this.props.scenarios}
-                                    onCreateScenario={this.props.createScenario}
-                                    onScenarioChange={this.props.handleScenarioChange}
-                                    onActionChange={this.props.actionChange}
-                                />
-                            </div>
-
-                        }
-                    </ForecastModal>
-                : null}
+                    this.showModal(this.props.modal.type) :
+                    null
+                }
             </div>
         )
-    };
+    }
 };
 
 export default ForecastHeader;

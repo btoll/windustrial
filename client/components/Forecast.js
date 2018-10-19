@@ -94,6 +94,7 @@ class Forecast extends React.Component {
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
         this.createScenario = this.createScenario.bind(this);
+        this.saveScenario = this.saveScenario.bind(this);
         this.updateScenarioInfo = this.updateScenarioInfo.bind(this);
         this.handleScenarioChange = this.handleScenarioChange.bind(this);
     }
@@ -103,6 +104,90 @@ class Forecast extends React.Component {
         if (this.state.dirty) {
             console.log('dirty');
         }
+    }
+
+    closeModal(e) {
+        this.setState({
+            modal: {
+                show: false
+            }
+        });
+    }
+
+    openModal(type, e) {
+        this.setState({
+            modal: {
+                show: true,
+                type
+            }
+        });
+    }
+
+    createScenario(e) {
+        e.preventDefault();
+
+        // TODO: Should be better way to toggle spinner contents!
+        this.closeModal();
+        this.openModal('spinnerModal');
+
+        const formData = new FormData(e.target);
+
+        axios({
+            method: 'post',
+            url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
+            headers: {
+                'AuthorizationToken': this.state.authToken
+            }
+        })
+        .then(res => {
+            this.setState({
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+            });
+
+            // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
+            this.getAllScenarios();
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
+        });
+    }
+
+    getAllScenarios() {
+        // First, get all scenarios.
+        axios({
+            method: 'post',
+            url: AUTH,
+            auth: {
+                username: 'general@demo.com',
+                password: '4Testing$'
+            }
+        })
+        .then(res => {
+            const authToken = res.headers.authorizationtoken;
+
+            this.setState({
+                authToken: authToken
+            });
+
+            return axios({
+                method: 'get',
+                url: SCENARIO_ENDPOINT_BASE,
+                headers: {
+                    'AuthorizationToken': authToken
+                }
+            })
+        }).then(res => {
+            this.setState({
+                scenarios: res.data
+            });
+
+            this.closeModal();
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
+        });
     }
 
     handlePercentageChange(e, row, rowNum) {
@@ -167,54 +252,11 @@ class Forecast extends React.Component {
         });
     }
 
-    createScenario(e) {
-        e.preventDefault();
-
-        const formData = new FormData(e.target);
-
-        axios({
-            method: 'post',
-            url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            }
-        })
-        .then(res =>
-            this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            })
-        )
-        .catch(console.log);
-
-        this.closeModal();
-    }
-
-    updateScenarioInfo(e) {
-        e.preventDefault();
-
-        const req = Object.assign({}, this.state.selected);
-        const formData = new FormData(e.target);
-        req.Name = formData.get('scenarioName');
-
-        axios({
-            method: 'put',
-            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selected.Id}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            },
-            data: req
-        })
-        .then(res =>
-            this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            })
-        )
-        .catch(console.log);
-
-        this.closeModal();
-    }
-
     handleScenarioChange(e) {
+        // TODO: Should be better way to toggle spinner contents!
+        this.closeModal();
+        this.openModal('spinnerModal');
+
         // Now get a specific scenario.
         axios({
             method: 'get',
@@ -242,30 +284,10 @@ class Forecast extends React.Component {
 
             this.closeModal();
         })
-        .catch(console.log);
-    }
-
-    openModal(type, e) {
-        this.setState({
-            modal: {
-                show: true,
-                type
-            }
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
         });
-    }
-
-    closeModal(e) {
-        this.setState({
-            modal: {
-                show: false
-            }
-        });
-    }
-
-    toggleExpandCollapse(groupName) {
-        this.setState(() =>
-            this.state.expanded[groupName] = !this.state.expanded[groupName]
-        );
     }
 
     renderGroup(groupName) {
@@ -297,36 +319,52 @@ class Forecast extends React.Component {
         );
     }
 
-    componentDidMount() {
-        // First, get all scenarios.
+    // TODO
+    saveScenario() {
+        this.openModal('spinnerModal');
+
+        setTimeout(() => {
+            this.closeModal();
+        }, 2000);
+    }
+    // TODO
+
+    toggleExpandCollapse(groupName) {
+        this.setState(() =>
+            this.state.expanded[groupName] = !this.state.expanded[groupName]
+        );
+    }
+
+    updateScenarioInfo(e) {
+        e.preventDefault();
+
+        const req = Object.assign({}, this.state.selected);
+        const formData = new FormData(e.target);
+        req.Name = formData.get('scenarioName');
+
+        // TODO: Should be better way to toggle spinner contents!
+        this.closeModal();
+        this.openModal('spinnerModal');
+
         axios({
-            method: 'post',
-            url: AUTH,
-            auth: {
-                username: 'general@demo.com',
-                password: '4Testing$'
-            }
+            method: 'put',
+            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selected.Id}`,
+            headers: {
+                'AuthorizationToken': this.state.authToken
+            },
+            data: req
         })
         .then(res => {
-            const authToken = res.headers.authorizationtoken;
-
             this.setState({
-                authToken: authToken
-            });
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+            })
 
-            return axios({
-                method: 'get',
-                url: SCENARIO_ENDPOINT_BASE,
-                headers: {
-                    'AuthorizationToken': authToken
-                }
-            })
-        }).then(res =>
-            this.setState({
-                scenarios: res.data
-            })
-        )
-        .catch(console.log);
+            this.closeModal();
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
+        });
     }
 
     render() {
@@ -384,9 +422,14 @@ class Forecast extends React.Component {
                     }
                 </div>
 
-                <input onClick={() => {}} type='button' className='actionButton' value='Save' />
+                <input onClick={this.saveScenario} type='button' className='actionButton' value='Save' />
             </div>
         )
+    }
+
+    componentDidMount() {
+        this.openModal('spinnerModal');
+        this.getAllScenarios();
     }
 }
 
