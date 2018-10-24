@@ -37,7 +37,7 @@ class ForecastHeader extends React.Component {
                 return (
                     <ForecastModal
                         className={`${this.props.modal.type} ReactModal__Content__base`}
-                        onCloseModal={this.props.onCloseModal}
+                        onCloseModal={this.props.closeModal}
                         showModal={this.props.modal.show}
                     >
                         <div>
@@ -57,7 +57,7 @@ class ForecastHeader extends React.Component {
                 return (
                     <ForecastModal
                         className={`${this.props.modal.type} ReactModal__Content__base`}
-                        onCloseModal={this.props.onCloseModal}
+                        onCloseModal={this.props.closeModal}
                         showModal={this.props.modal.show}
                     >
                         <div>

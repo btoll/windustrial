@@ -53,7 +53,11 @@ class Forecast extends React.Component {
             },
             percentages: [],
             scenarios: [],
-            selected: {}
+            selected: {},
+
+            // Hacks.
+            custom: '',
+            selectedPercent: ''
         }
 
         this.styles = {
@@ -191,6 +195,10 @@ class Forecast extends React.Component {
     }
 
     handlePercentageChange(e, row, rowNum) {
+        // TODO: Should be better way to toggle spinner contents!
+        this.closeModal();
+        this.openModal('spinnerModal');
+
         const target = e.target;
         let percentages = this.state.percentages.concat();
         let col, value;
@@ -204,32 +212,64 @@ class Forecast extends React.Component {
             [col, value] = JSON.parse(target.value);
         }
 
-        // This will catch "0", "0.0", "" and NaN.
-        if (!(value * 1)) {
-            percentages = percentages.filter(p => p.Id !== row.Id);
-        } else {
+//        // This will catch "0", "0.0", "" and NaN.
+//        if (!(value * 1)) {
+//            percentages = percentages.filter(p => p.Id !== row.Id);
+        if (target.classList.contains('Percentage-custom')) {
             let found = false;
 
-            percentages = percentages.map(p => {
-                if (p.Id === row.Id) {
-                    found = true;
+            const f = percentages.map(p => {
+                if (p.RowNumber === rowNum && p.ColumnName === col) {
                     p.Value = value / 100;
+                    found = true;
                 }
+
                 return p;
             });
 
             if (!found) {
                 percentages.push({
-                    Id: row.Id,
                     ColumnName: col,
                     RowNumber: rowNum,
                     Value: value / 100
+                }, {
+                    ColumnName: 'V',
+                    RowNumber: rowNum,
+                    Value: 'True'
+                });
+            }
+        } else {
+            let found = false;
+
+            const f = percentages.map(p => {
+                if (p.RowNumber === rowNum) {
+                    p.ColumnName = col;
+                    found = true;
+                }
+
+                return p;
+            });
+
+            if (!found) {
+                percentages.push({
+                    ColumnName: col,
+                    RowNumber: rowNum,
+                    Value: 'True'
                 });
             }
         }
 
         const req = Object.assign({}, this.state.selected);
         req.ScenarioForecastOptions = percentages;
+
+        let custom = '';
+        let selectedPercent = '';
+
+        if (e.target.nodeName === 'SELECT') {
+            selectedPercent = e.target.value;
+        } else {
+            custom = e.target.value;
+        }
 
         axios({
             method: 'put',
@@ -239,12 +279,19 @@ class Forecast extends React.Component {
             },
             data: req
         })
-        .then(res =>
+        .then(res => {
             this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            })
-        )
-        .catch(console.log);
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
+                custom,
+                selectedPercent
+            });
+
+            this.closeModal();
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
+        });
 
         this.setState({
             percentages: percentages,
@@ -312,6 +359,8 @@ class Forecast extends React.Component {
                             rowNum={groupRows[i]}
                             handlePercentageChange={this.handlePercentageChange}
                             expanded={this.state.expanded[groupName]}
+                            custom={this.state.custom}
+                            selectedPercent={this.state.selectedPercent}
                         />
                     ))
                 }

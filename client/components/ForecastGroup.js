@@ -7,26 +7,27 @@ import { PERCENTAGES } from './config';
 class Percentage extends React.Component {
     constructor(props) {
         super(props);
+
         this.state = {
             custom: '',
-            selected: ''
+            selectedPercent: ''
         }
 
         this.onSelected = this.onSelected.bind(this);
     }
 
     onSelected(e) {
-        if (e.target.nodeName === 'SELECT') {
-            this.setState({
-                custom: '',
-                selected: e.target.value
-            });
-        } else {
-            this.setState({
-                custom: e.target.value,
-                selected: ''
-            });
-        }
+//        if (e.target.nodeName === 'SELECT') {
+//            this.setState({
+//                custom: '',
+//                selectedPercent: e.target.value
+//            });
+//        } else {
+//            this.setState({
+//                custom: e.target.value,
+//                selectedPercent: ''
+//            });
+//        }
 
         this.props.handlePercentageChange(e, this.props.row, this.props.rowNum)
     }
@@ -34,10 +35,10 @@ class Percentage extends React.Component {
     render() {
         return (
             <div>
-                <select value={this.state.selected} onChange={this.onSelected}>
+                <select value={this.props.selectedPercent} onChange={this.onSelected}>
                     <option key="0" value="[0, 0]">Choose a percentage</option>
                     {PERCENTAGES.map(o =>
-                        <option key={o.val} value={`["${o.col}", ${o.val}]`} col={o.col}>{o.val}</option>
+                        <option key={o.val} value={`["${o.col}", "${o.val}"]`} col={o.col}>{o.val}</option>
                     )}
                 </select>
                 <input
@@ -86,6 +87,8 @@ const ForecastGroup = props => {
                         handlePercentageChange={props.handlePercentageChange}
                         row={props.row}
                         rowNum={props.rowNum}
+                        custom={props.custom}
+                        selectedPercent={props.selectedPercent}
                     />
                 : <div style={{'display': 'none'}}></div>
             }
