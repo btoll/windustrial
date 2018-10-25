@@ -55,7 +55,10 @@ class Forecast extends React.Component {
             scenarios: [],
             selected: {},
 
-            selections: {}
+            selections: {
+                input: {},
+                select: {}
+            }
         }
 
         this.styles = {
@@ -193,31 +196,34 @@ class Forecast extends React.Component {
     }
 
     // TODO: Clean this up (DRY)!
-    handlePercentageChange(e, row, rowNum) {
+    handlePercentageChange(target, row, rowNum) {
         // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
 
-        const target = e.target;
         const selections = Object.assign({}, this.state.selections);
+        const fromCustomInput = target.nodeName.toLowerCase() === 'input';
         let percentages = this.state.percentages.concat();
         let value = target.value;
         let col;
 
         // This guard *probably* isn't necessary, but you know, habit...   :)
-        if (target.dataset && target.dataset.col) {
-            col = target.dataset.col;
-            selections[row.LineItem] = value;
+        if (fromCustomInput) {
+            selections.input[row.LineItem] = value;
+            selections.select[row.LineItem] = '0';
         } else {
             // TODO: Error checking!
             col = target.value;
-            selections[row.LineItem] = col;
+            selections.select[row.LineItem] = col;
+            selections.input[row.LineItem] = '';
         }
 
-        // Note will want to coerce the value string (==)!
-        if (value == 0) {
+        percentages = percentages.filter(p => p.RowNumber !== rowNum);
+
+        // Coercion.
+        if (value == '0') {
             percentages = percentages.filter(p => p.RowNumber !== rowNum);
-        } else if (target.classList.contains('Percentage-custom')) {
+        } else if (fromCustomInput) {
             let found = false;
 
             const f = percentages.map(p => {
@@ -231,7 +237,7 @@ class Forecast extends React.Component {
 
             if (!found) {
                 percentages.push({
-                    ColumnName: col,
+                    ColumnName: 'U',
                     RowNumber: rowNum,
                     Value: value / 100
                 }, {
