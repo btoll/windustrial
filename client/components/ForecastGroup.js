@@ -8,45 +8,36 @@ class Percentage extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            custom: '',
-            selectedPercent: ''
-        }
-
         this.onSelected = this.onSelected.bind(this);
+
+//        if (props.selections[props.row.LineItem]) {
+//            debugger;
+//        }
     }
 
     onSelected(e) {
-//        if (e.target.nodeName === 'SELECT') {
-//            this.setState({
-//                custom: '',
-//                selectedPercent: e.target.value
-//            });
-//        } else {
-//            this.setState({
-//                custom: e.target.value,
-//                selectedPercent: ''
-//            });
-//        }
-
         this.props.handlePercentageChange(e, this.props.row, this.props.rowNum)
     }
 
     render() {
         return (
             <div>
-                <select value={this.props.selectedPercent} onChange={this.onSelected}>
-                    <option key="0" value="[0, 0]">Choose a percentage</option>
+                <select id={this.props.row.LineItem} value={this.props.selections[this.props.row.LineItem]} onChange={this.onSelected}>
+                    <option key="0" value="0">Choose a percentage</option>
                     {PERCENTAGES.map(o =>
-                        <option key={o.val} value={`["${o.col}", "${o.val}"]`} col={o.col}>{o.val}</option>
+                        <option key={o.val} value={o.col} col={o.col}>{o.val}</option>
                     )}
                 </select>
                 <input
                     className="Percentage-custom"
                     type="text"
                     data-col="U"
-                    value={this.state.custom}
-                    onChange={this.onSelected}
+                    value={this.props.selections[this.props.row.LineItem]}
+                />
+                <input
+                    type="button"
+                    onClick={this.onSelected}
+                    value="Send"
                 />
             </div>
         );
@@ -87,8 +78,7 @@ const ForecastGroup = props => {
                         handlePercentageChange={props.handlePercentageChange}
                         row={props.row}
                         rowNum={props.rowNum}
-                        custom={props.custom}
-                        selectedPercent={props.selectedPercent}
+                        selections={props.selections}
                     />
                 : <div style={{'display': 'none'}}></div>
             }

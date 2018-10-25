@@ -55,9 +55,7 @@ class Forecast extends React.Component {
             scenarios: [],
             selected: {},
 
-            // Hacks.
-            custom: '',
-            selectedPercent: ''
+            selections: {}
         }
 
         this.styles = {
@@ -194,28 +192,32 @@ class Forecast extends React.Component {
         });
     }
 
+    // TODO: Clean this up (DRY)!
     handlePercentageChange(e, row, rowNum) {
         // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
 
         const target = e.target;
+        const selections = Object.assign({}, this.state.selections);
         let percentages = this.state.percentages.concat();
-        let col, value;
+        let value = target.value;
+        let col;
 
         // This guard *probably* isn't necessary, but you know, habit...   :)
         if (target.dataset && target.dataset.col) {
             col = target.dataset.col;
-            value = target.value;
+            selections[row.LineItem] = value;
         } else {
             // TODO: Error checking!
-            [col, value] = JSON.parse(target.value);
+            col = target.value;
+            selections[row.LineItem] = col;
         }
 
-//        // This will catch "0", "0.0", "" and NaN.
-//        if (!(value * 1)) {
-//            percentages = percentages.filter(p => p.Id !== row.Id);
-        if (target.classList.contains('Percentage-custom')) {
+        // Note will want to coerce the value string (==)!
+        if (value == 0) {
+            percentages = percentages.filter(p => p.RowNumber !== rowNum);
+        } else if (target.classList.contains('Percentage-custom')) {
             let found = false;
 
             const f = percentages.map(p => {
@@ -262,15 +264,6 @@ class Forecast extends React.Component {
         const req = Object.assign({}, this.state.selected);
         req.ScenarioForecastOptions = percentages;
 
-        let custom = '';
-        let selectedPercent = '';
-
-        if (e.target.nodeName === 'SELECT') {
-            selectedPercent = e.target.value;
-        } else {
-            custom = e.target.value;
-        }
-
         axios({
             method: 'put',
             url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selected.Id}`,
@@ -282,8 +275,7 @@ class Forecast extends React.Component {
         .then(res => {
             this.setState({
                 forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
-                custom,
-                selectedPercent
+                selections: selections
             });
 
             this.closeModal();
@@ -359,8 +351,7 @@ class Forecast extends React.Component {
                             rowNum={groupRows[i]}
                             handlePercentageChange={this.handlePercentageChange}
                             expanded={this.state.expanded[groupName]}
-                            custom={this.state.custom}
-                            selectedPercent={this.state.selectedPercent}
+                            selections={this.state.selections}
                         />
                     ))
                 }
