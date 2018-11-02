@@ -1,5 +1,6 @@
 import React from 'react';
-import classNames from 'classnames';
+
+import Futures from './modal/Futures';
 import Currency from './formatters/Currency';
 import Percent from './formatters/Percent';
 import { PERCENTAGES } from './config';
@@ -9,6 +10,7 @@ class Percentage extends React.Component {
         super(props);
 
         this.onSelected = this.onSelected.bind(this);
+        this.raiseFutures = this.raiseFutures.bind(this);
     }
 
     onSelected(e) {
@@ -41,44 +43,39 @@ class Percentage extends React.Component {
     }
 }
 
-const ForecastGroup = props => {
-    const pastClass1 = classNames({
-        'col': true,
-        'col-sm-1': true,
-        'pull-left': true,
-        'text-right': true,
-        'd-none': props.pastVisible
-    });
-    const pastClass2 = classNames({
-        'col': true,
-        'col-sm-2': true,
-        'pull-left': true,
-        'text-right': true,
-        'd-none': props.pastVisible
-    });
+const prepareData = (props, e) => {
+    const data = {
+        row: props.row,
+        rowNum: props.rowNum
+    };
 
+    props.onOpenModal('futures', data, e);
+};
+
+const ForecastGroup = props => {
     // Matches 'Total Overhead' or 'Net Profit' or 'Gross Profit', etc.
     // https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/    :)
     const displayPercentages = !props.row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i);
+//
+//            {
+//                displayPercentages ?
+//                    <Percentage
+//                        handlePercentageChange={props.handlePercentageChange}
+//                        row={props.row}
+//                        rowNum={props.rowNum}
+//                        selections={props.selections}
+//                    />
+//                : <div style={{'display': 'none'}}></div>
+//            }
 
     return (
         <div key={props.row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
-            <div className="col col-sm-2" style={{'fontWeight': displayPercentages ? 'normal' : 'bold'}}>{props.row.LineItem}</div>
-            <div className={pastClass2}><Currency value={props.row.CurrentStartAmount + ''} /></div>
-            <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.CurrentEndAmount + ''} /></div>
-            <div className={pastClass1}><Percent value={props.row.ForecastPercentChange + ''} /></div>
-            <div className="col col-sm-2 pull-left text-right"><Currency value={props.row.ForecastAmount + ''} /></div>
-            <div className="col col-sm-1 pull-left text-right"><Percent value={props.row.ForecastPercentChange + ''} /></div>
-            {
-                displayPercentages ?
-                    <Percentage
-                        handlePercentageChange={props.handlePercentageChange}
-                        row={props.row}
-                        rowNum={props.rowNum}
-                        selections={props.selections}
-                    />
-                : <div style={{'display': 'none'}}></div>
-            }
+            <div className="col" style={{'fontWeight': displayPercentages ? 'normal' : 'bold'}}>{props.row.LineItem}</div>
+            <div className="col"><Currency value={props.row.CurrentStartAmount + ''} /></div>
+            <div className="col"><Currency value={props.row.CurrentEndAmount + ''} /></div>
+            <div className="col"><Percent value={props.row.ForecastPercentChange + ''} /></div>
+            <div className="col"><Currency value={props.row.ForecastAmount + ''} /></div>
+            <div onMouseOver={prepareData.bind(null, props)} className="col"><Percent value={props.row.ForecastPercentChange + ''} /></div>
         </div>
     );
 }

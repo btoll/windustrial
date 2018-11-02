@@ -1,11 +1,10 @@
 import React from 'react';
 import axios from 'axios';
-import classNames from 'classnames';
-import { FaCaretUp, FaCaretRight, FaCaretLeft, FaCaretDown } from 'react-icons/lib/fa';
 
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 import ForecastGroup from './ForecastGroup';
-import ForecastHeader from '../components/ForecastHeader';
+import ForecastNav from '../components/ForecastNav';
+import Futures from './modal/Futures';
 
 const getForecastGroups = data => ({
     'Gross Revenue': {
@@ -28,7 +27,7 @@ const getForecastGroups = data => ({
     }
 });
 
-class Forecast extends React.Component {
+export default class ForecastMain extends React.Component {
     constructor(props) {
         super(props);
 
@@ -48,6 +47,7 @@ class Forecast extends React.Component {
                 '': [] // COGS
             },
             modal: {
+                data: {},
                 show: false,
                 type: null
             },
@@ -92,7 +92,7 @@ class Forecast extends React.Component {
             }
         }
 
-        this.actionChange = this.actionChange.bind(this);
+//        this.actionChange = this.actionChange.bind(this);
         this.handlePercentageChange = this.handlePercentageChange.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -104,24 +104,28 @@ class Forecast extends React.Component {
         this.handleScenarioChange = this.handleScenarioChange.bind(this);
     }
 
+    /*
     actionChange(e) {
         // Prompt to save or otherwise disallow since the source data has been updated/changed.
         if (this.state.dirty) {
             console.log('dirty');
         }
     }
+    */
 
     closeModal(e) {
         this.setState({
             modal: {
+                data: {},
                 show: false
             }
         });
     }
 
-    openModal(type, e) {
+    openModal(type, data, e) {
         this.setState({
             modal: {
+                data,
                 show: true,
                 type
             }
@@ -196,13 +200,19 @@ class Forecast extends React.Component {
     }
 
     // TODO: Clean this up (DRY)!
-    handlePercentageChange(target, row, rowNum) {
+    handlePercentageChange(e) {
+        const target = e.currentTarget;
+        const modalState = this.state.modal.data;
+        const row = modalState.row;
+        const rowNum = modalState.rowNum;
+
         // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
 
         const selections = Object.assign({}, this.state.selections);
-        const fromCustomInput = target.nodeName.toLowerCase() === 'input';
+//        const fromCustomInput = target.nodeName.toLowerCase() === 'input';
+        const fromCustomInput = false;
         let percentages = this.state.percentages.concat();
         let value = target.value;
         let col;
@@ -302,37 +312,55 @@ class Forecast extends React.Component {
         this.closeModal();
         this.openModal('spinnerModal');
 
-        // Now get a specific scenario.
-        axios({
-            method: 'get',
-            url: `${SCENARIO_ENDPOINT_BASE}/${e.target.value}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            }
-        })
-        .then(res => {
-            const data = res.data;
-            const blacklistedKeys = ['ScenarioForecasts', 'ScenarioForecastOptions', 'ScenarioOverrides'];
+        // If button, the user would like to retrieve another scenario, simply "clear" the screen.
+        if (e.currentTarget.nodeName.toLowerCase() === 'form') {
+            e.preventDefault();
 
+            // TODO: What are `Revenue Center` and `Notes`?
             this.setState({
-                selected: (() => {
-                    const o = {};
-                    for (const key of Object.keys(data)) {
-                        if (!blacklistedKeys.includes(key)) {
-                            o[key] = data[key];
-                        }
-                    }
-                    return o;
-                })(),
-                forecastGroups: getForecastGroups(data.ScenarioForecasts)
+                selected: {
+                    Id: 0,
+                    CreatedDateTime: '',
+                    Description: '',
+                    LOB: '',
+                    ModifiedDateTime: ''
+                }
             });
 
             this.closeModal();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+        } else {
+            // Now get a specific scenario.
+            axios({
+                method: 'get',
+                url: `${SCENARIO_ENDPOINT_BASE}/${e.target.value}`,
+                headers: {
+                    'AuthorizationToken': this.state.authToken
+                }
+            })
+            .then(res => {
+                const data = res.data;
+                const blacklistedKeys = ['ScenarioForecasts', 'ScenarioForecastOptions', 'ScenarioOverrides'];
+
+                this.setState({
+                    selected: (() => {
+                        const o = {};
+                        for (const key of Object.keys(data)) {
+                            if (!blacklistedKeys.includes(key)) {
+                                o[key] = data[key];
+                            }
+                        }
+                        return o;
+                    })(),
+                    forecastGroups: getForecastGroups(data.ScenarioForecasts)
+                });
+
+                this.closeModal();
+            })
+            .catch(err => {
+                console.log(err);
+                this.closeModal();
+            });
+        }
     }
 
     renderGroup(groupName) {
@@ -342,11 +370,11 @@ class Forecast extends React.Component {
 
         return (
             <div style={{'marginBottom': '30px'}} key={groupName}>
-                <h5
+                <h3
                     onClick={this.toggleExpandCollapse.bind(null, groupName)}
                     className={this.state.expanded[groupName] ? 'collapsed' : 'expanded'}
                     style={{'cursor': 'pointer'}}
-                >{groupName || 'COGS'}</h5>
+                >{groupName || 'COGS'}</h3>
 
                 {/* Render group rows. */}
                 {
@@ -355,9 +383,11 @@ class Forecast extends React.Component {
                             key={c.Id}
                             row={c}
                             rowNum={groupRows[i]}
-                            handlePercentageChange={this.handlePercentageChange}
+                            /*handlePercentageChange={this.handlePercentageChange}*/
+                            modal={this.state.modal}
+                            onOpenModal={this.openModal}
                             expanded={this.state.expanded[groupName]}
-                            selections={this.state.selections}
+                            /*selections={this.state.selections}*/
                         />
                     ))
                 }
@@ -414,70 +444,75 @@ class Forecast extends React.Component {
     }
 
     render() {
-        const pastClass1 = classNames({
-            'col': true,
-            'col-sm-1': true,
-            'pull-left': true,
-            'text-right': true
-        });
-        const pastClass2 = classNames({
-            'col': true,
-            'col-sm-2': true,
-            'pull-left': true,
-            'text-right': true
-        });
+//                <ForecastHeader
+//                    modal={this.state.modal}
+//                    scenarios={this.state.scenarios}
+//                    selected={this.state.selected}
+//
+//                    actionChange={this.actionChange}
+//                    closeModal={this.closeModal}
+//                    openModal={this.openModal}
+//
+//                    createScenario={this.createScenario}
+//                    updateScenarioInfo={this.updateScenarioInfo}
+//                    handleScenarioChange={this.handleScenarioChange}
+//                />
 
         return (
-            <div>
-                <ForecastHeader
+            <>
+                <ForecastNav
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
                     selected={this.state.selected}
-
-                    actionChange={this.actionChange}
-                    closeModal={this.closeModal}
-                    openModal={this.openModal}
-
-                    createScenario={this.createScenario}
-                    updateScenarioInfo={this.updateScenarioInfo}
-                    handleScenarioChange={this.handleScenarioChange}
+                    onScenarioChange={this.handleScenarioChange}
                 />
 
-                <div className='container-fluid'>
-                    <div style={this.styles.headerRow} className='row'>
-                        <div className='col col-sm-2'></div>
-                        <div className={pastClass2}>Past</div>
-                        <div className='col col-sm-2 pull-left text-right'>Current</div>
-                        <div className={pastClass1}></div>
-                        <div className='col col-sm-2 pull-left text-right'>Future</div>
-                        <div className='col col-sm-1 pull-left text-right'></div>
+                <section id="groups">
+                    <h1>Company Name</h1>
+                    <div style={this.styles.headerRow} className="row">
+                        <div className="col"></div>
+                        <div className="col">Past</div>
+                        <div className="col">Current</div>
+                        <div className="col"></div>
+                        <div className="col">Future</div>
+                        <div className="col"></div>
                     </div>
-                    <div style={this.styles.subHeaderRow} className='row'>
-                        <div className='col col-sm-2'></div>
-                        <div className={pastClass2}></div>
-                        <div className='col col-sm-2 pull-left text-right'></div>
-                        <div className={pastClass1}>% +/-</div>
-                        <div className='col col-sm-2 pull-left text-right'></div>
-                        <div className='col col-sm-1 pull-left text-right'>% +/-</div>
+                    <div style={this.styles.subHeaderRow} className="row">
+                        <div className="col"></div>
+                        <div className="col">mm/dd/yy to mm/dd/yy</div>
+                        <div className="col">mm/dd/yy to mm/dd/yy</div>
+                        <div className="col">% +/-</div>
+                        <div className="col">mm/dd/yy to mm/dd/yy</div>
+                        <div className="col">% +/-</div>
                     </div>
+
                     {
-                        Object.keys(this.state.selected).length ?
+                        !!this.state.selected.Id ?
                             ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
                     }
-                </div>
 
-                <input onClick={this.saveScenario} type='button' className='actionButton' value='Save' />
-            </div>
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'futures' &&
+                            <Futures
+                                show={this.state.modal.show}
+                                data={this.state.modal.data}
+                                onClickRadio={this.handlePercentageChange}
+                                onClose={this.closeModal}
+                            /> :
+                        null
+                    }
+                </section>
+            </>
         )
     }
+
+//                <input onClick={this.saveScenario} type='button' className='actionButton' value='Save' />
 
     componentDidMount() {
         this.openModal('spinnerModal');
         this.getAllScenarios();
     }
 }
-
-export default Forecast;
 
