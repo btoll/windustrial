@@ -145,11 +145,11 @@ section#groups div.col {
     flex: 0 0 16.666667%;
     max-width: 16.666667%;
 }
-section#futures {
+section#forecastOptions {
     padding: 10px 10px 10px 40px;
     width: 450px;
 }
-section#futures button {
+section#forecastOptions button {
     background-color: white;
     border-width: 0;
     cursor: pointer;
@@ -158,23 +158,23 @@ section#futures button {
     top: 10px;
     right: 10px;
 }
-section#futures p {
+section#forecastOptions p {
     font-size: 16px;
     font-weight: bold;
     margin: 0;
 }
-section#futures p span {
+section#forecastOptions p span {
     display: block;
     font-size: 14px;
     font-weight: normal;
     margin: 5px 0;
 }
-section#futures form label {
+section#forecastOptions form label {
     display: inline-block;
     font-size: 15px;
     margin: 5px 0 0 10px;
 }
-section#futures form input[type=submit] {
+section#forecastOptions form input[type=submit] {
     background: green;
     border-radius: 20px;
     border-width: 0;
@@ -229,7 +229,7 @@ nav form input[type=submit] {
     display: block;
     font-size: 13px;
     font-weight: bold;
-    margin: 5px auto;
+    margin: 5px;
     padding: 6px;
 }
 

@@ -7,13 +7,6 @@ const AUTH = `${SOCKET}/api/users/login`;
 const ENDPOINT = 'api/scenario';
 const SCENARIO_ENDPOINT_BASE = `${SOCKET}/${ENDPOINT}`;
 
-//const PERCENTAGES = [3, 5, 7, 9];
-const PERCENTAGES = [
-    {col: 'L', val: 3},
-    {col: 'O', val: 5},
-    {col: 'R', val: 7}
-];
-
 /*
 function* incrementer() {
     let n = 100;
@@ -30,7 +23,6 @@ const incr = (i =>
 
 export {
     AUTH,
-    PERCENTAGES,
     SCENARIO_ENDPOINT_BASE,
     SOCKET
 };
