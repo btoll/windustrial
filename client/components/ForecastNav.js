@@ -3,7 +3,7 @@ import ReactModal from 'react-modal';
 
 import Spinner from './modal/Spinner';
 
-export default class ForecastHeader extends React.Component {
+export default class ForecastNav extends React.Component {
     constructor(props) {
         super(props);
 
@@ -18,7 +18,7 @@ export default class ForecastHeader extends React.Component {
         return (
             <nav>
                 <h2>View Scenario</h2>
-                <form onSubmit={this.props.onChangeScenario}>
+                <form>
                     <div>
                         <label>{isSelected ? 'Selected' : 'Retrieve'} scenario</label>
                         <select
@@ -37,8 +37,10 @@ export default class ForecastHeader extends React.Component {
                     <div>
                         <label>Description</label>
                         <textarea
+                            name="Description"
                             disabled={!isSelected}
                             value={this.props.selectedScenario.Description}
+                            onChange={this.props.onChangeText}
                         ></textarea>
                     </div>
                     <div>
@@ -66,24 +68,31 @@ export default class ForecastHeader extends React.Component {
                         <label>Revenue center</label>
                         <input
                             disabled={true}
-                            value=""
+                            value={this.props.selectedScenario.RevenueCenter}
                         />
                     </div>
                     <div>
                         <label>Notes</label>
                         <textarea
+                            name="Notes"
                             disabled={!isSelected}
+                            value={this.props.selectedScenario.Notes}
+                            onChange={this.props.onChangeText}
                         ></textarea>
                     </div>
                     <div>
                         <input
                             type="submit"
+                            name="save"
                             disabled={!isSelected}
+                            onClick={this.props.onUpdateScenario}
                             value="Save"
                         />
                         <input
                             type="submit"
+                            name="retrieveAnother"
                             disabled={!isSelected}
+                            onClick={this.props.onUpdateScenario}
                             value="Retrieve Another"
                         />
                     </div>
@@ -112,6 +121,11 @@ export default class ForecastHeader extends React.Component {
                     <div>
                         <select>
                             <option value="0">Select LOB</option>
+                            {
+                                ['Commercial Lines', 'Gross', 'Other'].map((name, i) => (
+                                    <option key={i} value={name}>{name}</option>
+                                ))
+                            }
                         </select>
                     </div>
                     <div>

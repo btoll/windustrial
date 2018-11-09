@@ -4,28 +4,58 @@ import axios from 'axios';
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 import ForecastGroup from './ForecastGroup';
 import ForecastNav from '../components/ForecastNav';
+import Confirm from './modal/Confirm';
 import ForecastOptions from './modal/ForecastOptions';
 
 const getForecastGroups = data => ({
     'Gross Revenue': {
-        data: data.filter(d => d.GroupName === 'Gross Revenue'),
-        rows: [7, 8, 9]
+        data: (data => {
+            const filtered = data.filter(d => d.GroupName === 'Gross Revenue')
+            return {
+                toggled: filtered,
+                nonToggled: filtered.slice(-1)
+            };
+        })(data)
     },
     'Non-Operating': {
-        data: data.filter(d => d.GroupName === 'Non-Operating'),
-        rows: [45, 46]
+        data: (data => {
+            const filtered = data.filter(d => d.GroupName === 'Non-Operating')
+            return {
+                toggled: filtered,
+                nonToggled: filtered.slice(-2)
+            };
+        })(data)
     },
     'Sales, General, Admin Expenses': {
-        data: data.filter(d => d.GroupName.includes('Sales')),
-        rows: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+        data: (data => {
+            const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
+            return {
+                toggled: filtered,
+                nonToggled: filtered.slice(-2)
+            };
+        })(data)
     },
     // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
     // ...should it be its own group?
     '': {
-        data: data.filter(d => !d.GroupName), // COGS
-        rows: [12, 13, 14, 15, 16, 17]
+        data: (data => {
+            const filtered = data.filter(d => !d.GroupName) // COGS
+            return {
+                toggled: filtered,
+                nonToggled: filtered.slice(-2)
+            };
+        })(data)
     }
 });
+
+const resetScenario = {
+    Id: 0,
+    CreatedDateTime: '',
+    Description: '',
+    LOB: '',
+    ModifiedDateTime: '',
+    Notes: ''
+};
 
 export default class ForecastMain extends React.Component {
     constructor(props) {
@@ -55,7 +85,11 @@ export default class ForecastMain extends React.Component {
             scenarios: [],
             selectedScenario: {},
 
-            scenarioForecasts: []
+            scenarioForecasts: [],
+
+            // Note these must be uppercased to match the json fields' case!
+            Description: '',
+            Notes: ''
         }
 
         this.styles = {
@@ -89,15 +123,18 @@ export default class ForecastMain extends React.Component {
             }
         }
 
+        this.confirm = this.confirm.bind(this);
+
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
         this.changeScenario = this.changeScenario.bind(this);
+        this.changeText = this.changeText.bind(this);
         this.createScenario = this.createScenario.bind(this);
         this.saveScenario = this.saveScenario.bind(this);
         this.updateForecastOptions = this.updateForecastOptions.bind(this);
-        this.updateScenarioInfo = this.updateScenarioInfo.bind(this);
+        this.updateScenario = this.updateScenario.bind(this);
     }
 
     closeModal(e) {
@@ -125,22 +162,20 @@ export default class ForecastMain extends React.Component {
         this.openModal('spinnerModal');
 
         // If button, the user would like to retrieve another scenario, simply "clear" the screen.
-        if (e.currentTarget.nodeName.toLowerCase() === 'form') {
-            e.preventDefault();
-
-            // TODO: What are `Revenue Center` and `Notes`?
-            this.setState({
-                selectedScenario: {
-                    Id: 0,
-                    CreatedDateTime: '',
-                    Description: '',
-                    LOB: '',
-                    ModifiedDateTime: ''
-                }
-            });
-
-            this.closeModal();
-        } else {
+//        if (e.currentTarget.nodeName.toLowerCase() === 'form') {
+//            e.preventDefault();
+//
+//            if (this.state.Description || this.state.Notes) {
+//                this.openModal('confirmModal');
+//            } else {
+//                // TODO: What are `Revenue Center` and `Notes`?
+//                this.setState({
+//                    selectedScenario: resetScenario
+//                });
+//
+//                this.closeModal();
+//            }
+//        } else {
             // Now get a specific scenario.
             axios({
                 method: 'get',
@@ -172,37 +207,66 @@ export default class ForecastMain extends React.Component {
                 console.log(err);
                 this.closeModal();
             });
+//        }
+    }
+
+    changeText(e) {
+        const selectedScenario = Object.assign({}, this.state.selectedScenario);
+        selectedScenario[e.currentTarget.name] = e.currentTarget.value;
+
+        this.setState({
+            [e.currentTarget.name]: e.currentTarget.value,
+            selectedScenario
+        });
+    }
+
+    confirm(confirm, e) {
+        if (confirm) {
+            this.saveScenario();
         }
+
+        this.setState({
+            Description: '',
+            Notes: '',
+            selectedScenario: resetScenario
+        });
+
+        this.closeModal();
     }
 
     createScenario(e) {
         e.preventDefault();
-
-        // TODO: Should be better way to toggle spinner contents!
-        this.closeModal();
-        this.openModal('spinnerModal');
-
         const formData = new FormData(e.target);
 
-        axios({
-            method: 'post',
-            url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            }
-        })
-        .then(res => {
-            this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            });
+//        if (this.state.Description || this.state.Notes) {
+//            this.openModal('confirmModal', (function (e) {
+//                this.createScenario(e);
+//            }.bind(this, e)));
+//        } else {
+            // TODO: Should be better way to toggle spinner contents!
+    //        this.closeModal();
+            this.openModal('spinnerModal');
 
-            // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-            this.getAllScenarios();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+            axios({
+                method: 'post',
+                url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
+                headers: {
+                    'AuthorizationToken': this.state.authToken
+                }
+            })
+            .then(res => {
+                this.setState({
+                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+                });
+
+                // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
+                this.getAllScenarios();
+            })
+            .catch(err => {
+                console.log(err);
+                this.closeModal();
+            });
+//        }
     }
 
     getAllScenarios() {
@@ -243,44 +307,52 @@ export default class ForecastMain extends React.Component {
     }
 
     renderGroup(groupName) {
-        const group = this.state.forecastGroups[groupName];
-        const groupData = group.data;
-        const groupRows = group.rows;
-
         return (
             <div style={{'marginBottom': '30px'}} key={groupName}>
-                <h3
-                    onClick={this.toggleExpandCollapse.bind(null, groupName)}
-                    className={this.state.expanded[groupName] ? 'collapsed' : 'expanded'}
-                    style={{'cursor': 'pointer'}}
-                >{groupName || 'COGS'}</h3>
-
-                {/* Render group rows. */}
-                {
-                    groupData.map((c, i) => (
-                        <ForecastGroup
-                            key={c.Id}
-                            row={c}
-                            modal={this.state.modal}
-                            onOpenModal={this.openModal}
-                            expanded={this.state.expanded[groupName]}
-                            /*scenarioForecasts={this.state.scenarioForecasts}*/
-                        />
-                    ))
-                }
+                <ForecastGroup
+                    groupName={groupName}
+                    group={this.state.forecastGroups[groupName]}
+                    expanded={this.state.expanded[groupName]}
+                    modal={this.state.modal}
+                    onOpenModal={this.openModal}
+                    onHeaderClick={this.toggleExpandCollapse}
+                />
             </div>
         );
     }
 
-    // TODO
     saveScenario() {
         this.openModal('spinnerModal');
 
-        setTimeout(() => {
+        axios({
+            method: 'put',
+            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
+            headers: {
+                'AuthorizationToken': this.state.authToken
+            },
+            data: Object.assign({}, {
+                ScenarioForecasts: scenarioForecasts
+            }, this.state.selectedScenario)
+        })
+        .then(res => {
+            this.setState({
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
+                selections: selections
+            });
+
             this.closeModal();
-        }, 2000);
+        })
+        .catch(err => {
+            console.log(err);
+            this.closeModal();
+        });
     }
-    // TODO
+
+    toggleExpandCollapse(groupName) {
+        this.setState(() =>
+            this.state.expanded[groupName] = !this.state.expanded[groupName]
+        );
+    }
 
     updateForecastOptions(selectedForecastOption, e) {
         // TODO: Should be better way to toggle spinner contents!
@@ -332,79 +404,81 @@ export default class ForecastMain extends React.Component {
             console.log(err);
             this.closeModal();
         });
-
-//        this.setState({
-//            percentages: percentages,
-//            dirty: true
-//        });
     }
 
-    toggleExpandCollapse(groupName) {
-        this.setState(() =>
-            this.state.expanded[groupName] = !this.state.expanded[groupName]
-        );
-    }
-
-    updateScenarioInfo(e) {
+    updateScenario(e) {
         e.preventDefault();
 
-        const req = Object.assign({}, this.state.selectedScenario);
-        const formData = new FormData(e.target);
-        req.Name = formData.get('scenarioName');
+//        if (this.state.Description || this.state.Notes) {
+//            this.openModal('confirmModal');
+//        }
 
-        // TODO: Should be better way to toggle spinner contents!
-        this.closeModal();
-        this.openModal('spinnerModal');
-
-        axios({
-            method: 'put',
-            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            },
-            data: req
-        })
-        .then(res => {
+        // TODO: What are `Revenue Center` and `Notes`?
+        if (e.currentTarget.name === 'retrieveAnother') {
             this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            })
+                selectedScenario: resetScenario
+            });
+        } else {
+            // TODO: Should be better way to toggle spinner contents!
+            this.closeModal();
+            this.openModal('spinnerModal');
 
-            this.closeModal();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+            axios({
+                method: 'put',
+                url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
+                headers: {
+                    'AuthorizationToken': this.state.authToken
+                },
+                data: Object.assign({}, this.state.selectedScenario)
+            })
+            .then(res => {
+                this.setState({
+                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+                })
+
+                this.closeModal();
+            })
+            .catch(err => {
+                console.log(err);
+                this.closeModal();
+            });
+        }
     }
 
     render() {
         return (
             <>
+                <section id="banner">
+                    <h1>Business Forecasting Tool</h1>
+                </section>
+
                 <ForecastNav
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
                     selectedScenario={this.state.selectedScenario}
                     onChangeScenario={this.changeScenario}
+                    onChangeText={this.changeText}
                     onCreateScenario={this.createScenario}
+                    onUpdateScenario={this.updateScenario}
                 />
 
                 <section id="groups">
                     <h1>Company Name</h1>
                     <div style={this.styles.headerRow} className="row">
-                        <div className="col"></div>
-                        <div className="col">Past</div>
-                        <div className="col">Current</div>
-                        <div className="col"></div>
-                        <div className="col">Future</div>
-                        <div className="col"></div>
+                        <div></div>
+                        <div>Past</div>
+                        <div>Current</div>
+                        <div></div>
+                        <div>Future</div>
+                        <div></div>
                     </div>
                     <div style={this.styles.subHeaderRow} className="row">
-                        <div className="col"></div>
-                        <div className="col">mm/dd/yy to mm/dd/yy</div>
-                        <div className="col">mm/dd/yy to mm/dd/yy</div>
-                        <div className="col">% +/-</div>
-                        <div className="col">mm/dd/yy to mm/dd/yy</div>
-                        <div className="col">% +/-</div>
+                        <div></div>
+                        <div>mm/dd/yy to mm/dd/yy</div>
+                        <div>mm/dd/yy to mm/dd/yy</div>
+                        <div>% +/-</div>
+                        <div>mm/dd/yy to mm/dd/yy</div>
+                        <div>% +/-</div>
                     </div>
 
                     {
@@ -412,6 +486,16 @@ export default class ForecastMain extends React.Component {
                             ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
+                    }
+
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'confirmModal' &&
+                            <Confirm
+                                show={this.state.modal.show}
+                                onClick={this.confirm}
+                                onClose={this.closeModal}
+                            /> :
+                        null
                     }
 
                     {this.state.modal.show ?

@@ -4,27 +4,63 @@ import ForecastOptions from './modal/ForecastOptions';
 import Currency from './formatters/Currency';
 import Percent from './formatters/Percent';
 
-const prepareData = (props, e) => {
-    props.onOpenModal('forecastOptions', props.row, e);
+const prepareData = (onOpenModal, row, e) => {
+    onOpenModal('forecastOptions', row, e);
 };
 
-const ForecastGroup = props => {
-    const row = props.row;
+const attachEvent = (props, row) =>
+    !props.group.data.nonToggled.filter(r => r.Id === row.Id).length
+
+export default function ForecastGroup(props) {
     // Matches 'Total Overhead' or 'Net Profit' or 'Gross Profit', etc.
     // https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/    :)
-    const displayPercentages = !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i);
-
     return (
-        <div key={row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
-            <div className="col" style={{'fontWeight': displayPercentages ? 'normal' : 'bold'}}>{row.LineItem}</div>
-            <div className="col"><Currency value={row.CurrentStartAmount + ''} /></div>
-            <div className="col"><Currency value={row.CurrentEndAmount + ''} /></div>
-            <div className="col"><Percent value={row.ForecastPercentChange + ''} /></div>
-            <div className="col"><Currency value={row.ForecastAmount + ''} /></div>
-            <div onMouseOver={prepareData.bind(null, props)} className="col"><Percent value={row.ForecastPercentChange + ''} /></div>
-        </div>
+        <>
+            {
+                !props.expanded &&
+                    <h3
+                        onClick={props.onHeaderClick.bind(null, props.groupName)}
+                        className="expanded"
+                        style={{'cursor': 'pointer'}}
+                    >{props.groupName || 'COGS'}</h3>
+
+            }
+            {
+                !props.expanded &&
+                    props.group.data.nonToggled.map((row, i) => (
+                        <div key={row.Id} className="row">
+                            <div style={{'fontWeight': 'bold'}}>{row.LineItem}</div>
+                            <div><Currency value={row.CurrentStartAmount + ''} /></div>
+                            <div><Currency value={row.CurrentEndAmount + ''} /></div>
+                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div><Currency value={row.ForecastAmount + ''} /></div>
+                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
+                        </div>
+                    ))
+            }
+            {
+                props.expanded &&
+                    <h3
+                        onClick={props.onHeaderClick.bind(null, props.groupName)}
+                        className="collapsed"
+                        style={{'cursor': 'pointer'}}
+                    >{props.groupName || 'COGS'}</h3>
+
+            }
+            {
+                props.expanded &&
+                    props.group.data.toggled.map((row, i) => (
+                        <div key={row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
+                            <div style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{row.LineItem}</div>
+                            <div><Currency value={row.CurrentStartAmount + ''} /></div>
+                            <div><Currency value={row.CurrentEndAmount + ''} /></div>
+                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div><Currency value={row.ForecastAmount + ''} /></div>
+                            <div onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, row) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
+                        </div>
+                    ))
+            }
+        </>
     );
 }
-
-export default ForecastGroup;
 

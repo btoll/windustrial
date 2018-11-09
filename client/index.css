@@ -125,10 +125,20 @@ body {
 /*              Sections                */
 /*                                      */
 /****************************************/
+section#banner {
+    background-color: #383636;
+    color: white;
+    font-size: 40px;
+    height: 120px;
+}
+section#banner h1 {
+    margin: 0 0 0 100px;
+    padding: 20px;
+}
 section#groups {
     padding-right: 15px;
     padding-left: 15px;
-    margin: 200px auto 0 270px;
+    margin: 100px auto 0 270px;
 }
 section#groups h1 {
     margin: 40px 0;
@@ -141,7 +151,7 @@ section#groups div.row {
     margin-left: -15px;
     */
 }
-section#groups div.col {
+section#groups div.row > div {
     flex: 0 0 16.666667%;
     max-width: 16.666667%;
 }
@@ -194,7 +204,7 @@ section#forecastOptions form input[type=submit] {
 /****************************************/
 nav {
     position: fixed;
-    top: 80px;
+    top: 100px;
     left: 0;
     margin: 10px 10px 10px 20px;
     width: 240px;
