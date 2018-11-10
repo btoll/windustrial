@@ -336,8 +336,7 @@ export default class ForecastMain extends React.Component {
         })
         .then(res => {
             this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
-                selections: selections
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
             });
 
             this.closeModal();
@@ -358,7 +357,7 @@ export default class ForecastMain extends React.Component {
         // TODO: Should be better way to toggle spinner contents!
         e.preventDefault();
         this.closeModal();
-//        this.openModal('spinnerModal');
+        this.openModal('spinnerModal');
 
         let found = false;
         const target = e.currentTarget;
@@ -367,6 +366,7 @@ export default class ForecastMain extends React.Component {
                 found = true
 
                 return {
+                    Id: selectedForecastOption.ScenarioForecastId,
                     ScenarioId: this.state.selectedScenario.Id,
                     ScenarioForecastOptions: [selectedForecastOption]
                 };
@@ -377,6 +377,7 @@ export default class ForecastMain extends React.Component {
 
         if (!found) {
             scenarioForecasts.push({
+                Id: selectedForecastOption.ScenarioForecastId,
                 ScenarioId: this.state.selectedScenario.Id,
                 ScenarioForecastOptions: [selectedForecastOption]
             });
@@ -393,9 +394,11 @@ export default class ForecastMain extends React.Component {
             }, this.state.selectedScenario)
         })
         .then(res => {
+            const forecastGroups = getForecastGroups(res.data.ScenarioForecasts)
+
             this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
-                selections: selections
+//                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+                forecastGroups
             });
 
             this.closeModal();
