@@ -1,22 +1,15 @@
 import React from 'react';
-import ReactModal from 'react-modal';
 
-import Spinner from './modal/Spinner';
-
-export default class ForecastNav extends React.Component {
+export default class ForecastActions extends React.Component {
     constructor(props) {
         super(props);
-
-        // For aria, should hide underyling dom elements when modal is shown.
-        // (Doesn't appear to be working.)
-        ReactModal.setAppElement('#root');
     }
 
     render() {
         const isSelected = !!this.props.selectedScenario.Id;
 
         return (
-            <nav>
+            <section id="actions">
                 <h2>View Scenario</h2>
                 <form>
                     <div>
@@ -151,12 +144,7 @@ export default class ForecastNav extends React.Component {
                         />
                     </div>
                 </form>
-
-                {this.props.modal.show ?
-                    this.props.modal.type === 'spinnerModal' && <Spinner show={this.props.modal.show} /> :
-                    null
-                }
-            </nav>
+            </section>
         );
     }
 };

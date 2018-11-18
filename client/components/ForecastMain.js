@@ -1,11 +1,13 @@
 import React from 'react';
+import ReactModal from 'react-modal';
 import axios from 'axios';
 
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 import ForecastGroup from './ForecastGroup';
-import ForecastNav from '../components/ForecastNav';
+import ForecastActions from '../components/ForecastActions';
 import Confirm from './modal/Confirm';
 import ForecastOptions from './modal/ForecastOptions';
+import Spinner from './modal/Spinner';
 
 const getForecastGroups = data => ({
     'Gross Revenue': {
@@ -79,6 +81,7 @@ export default class ForecastMain extends React.Component {
             modal: {
                 data: {},
                 show: false,
+                text: '',
                 type: null
             },
             percentages: [],
@@ -135,6 +138,10 @@ export default class ForecastMain extends React.Component {
         this.saveScenario = this.saveScenario.bind(this);
         this.updateForecastOptions = this.updateForecastOptions.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
+
+        // For aria, should hide underyling dom elements when modal is shown.
+        // (Doesn't appear to be working.)
+        ReactModal.setAppElement('#root');
     }
 
     closeModal(e) {
@@ -146,11 +153,12 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    openModal(type, data, e) {
+    openModal(type, data, text, e) {
         this.setState({
             modal: {
                 data,
                 show: true,
+                text,
                 type
             }
         });
@@ -322,7 +330,7 @@ export default class ForecastMain extends React.Component {
     }
 
     saveScenario() {
-        this.openModal('spinnerModal');
+        this.openModal('spinnerModal', null, 'Please wait while we save your scenario');
 
         axios({
             method: 'put',
@@ -424,7 +432,7 @@ export default class ForecastMain extends React.Component {
         } else {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
-            this.openModal('spinnerModal');
+            this.openModal('spinnerModal', null, 'Please wait while we save your scenario...');
 
             axios({
                 method: 'put',
@@ -455,7 +463,7 @@ export default class ForecastMain extends React.Component {
                     <h1>Business Forecasting Tool</h1>
                 </section>
 
-                <ForecastNav
+                <ForecastActions
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
                     selectedScenario={this.state.selectedScenario}
@@ -466,14 +474,14 @@ export default class ForecastMain extends React.Component {
                 />
 
                 <section id="groups">
-                    <h1>Company Name</h1>
+                    <h1>{this.state.selectedScenario.Company}</h1>
                     <div style={this.styles.headerRow} className="row">
                         <div></div>
                         <div>Past</div>
                         <div>Current</div>
-                        <div>Growth</div>
+                        <div className="small">Growth</div>
                         <div>Future</div>
-                        <div class="small">Growth</div>
+                        <div className="small">Growth</div>
                     </div>
                     <div style={this.styles.subHeaderRow} className="row">
                         <div></div>
@@ -508,6 +516,15 @@ export default class ForecastMain extends React.Component {
                                 data={this.state.modal.data}
                                 onClose={this.closeModal}
                                 onSubmit={this.updateForecastOptions}
+                            /> :
+                        null
+                    }
+
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'spinnerModal' &&
+                            <Spinner
+                                show={this.state.modal.show}
+                                text={this.state.modal.text}
                             /> :
                         null
                     }

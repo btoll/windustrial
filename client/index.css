@@ -3,6 +3,9 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.noAlign {
+    text-align: center !important;
+}
 .small {
     font-size: 12px;
     font-weight: normal;
@@ -212,23 +215,23 @@ section#forecastOptions form input[type=submit] {
 /*                  Nav                 */
 /*                                      */
 /****************************************/
-nav {
+section#actions {
     position: fixed;
     top: 100px;
     left: 0;
     margin: 10px 10px 10px 20px;
     width: 240px;
 }
-nav h2 {
+section#actions h2 {
     margin: 20px 0 0;
 }
-nav form label {
+section#actions form label {
     font-weight: bold;
     display: block;
 }
-nav form input,
-nav form select,
-nav form textarea {
+section#actions form input,
+section#actions form select,
+section#actions form textarea {
     background: #eee;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -236,13 +239,13 @@ nav form textarea {
     padding: 4px;
     min-width: 200px;
 }
-nav form select {
+section#actions form select {
     width: 212px;
 }
-nav form textarea {
+section#actions form textarea {
     height: 20px;
 }
-nav form input[type=submit] {
+section#actions form input[type=submit] {
     background: green;
     border-radius: 20px;
     border-width: 0;

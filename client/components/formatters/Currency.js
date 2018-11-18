@@ -1,10 +1,23 @@
 import React from 'react';
 
-export default function CurrencyAmount(props) {
+export default function Currency(props) {
     if (Number.isNaN(Number(props.value))) {
-        return <div className="text-right mr-5"> - </div>;
+        return <div> - </div>;
     }
 
-    return <span>{Number(props.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>;
+    const isDecimal = props.style === 'decimal';
+    let d = props.value;
+
+    if (isDecimal) {
+        d >>= 0;
+    }
+
+    return <span>{
+        (
+            props.idx === 0 || isDecimal ?
+                '$' :
+            ''
+        ) + Number(d).toLocaleString('en-US', { style: 'decimal', currency: 'USD' })
+    }</span>;
 }
 

@@ -11,6 +11,10 @@ const prepareData = (onOpenModal, row, e) => {
 const attachEvent = (props, row) =>
     !props.group.data.nonToggled.filter(r => r.Id === row.Id).length
 
+// This can be expanded to switch on different strings, but for now just do the one we need.
+const changeLineItem = s =>
+    s === "Total Gross Revenue" ? "Total Revenue" : s;
+
 export default function ForecastGroup(props) {
     // Matches 'Total Overhead' or 'Net Profit' or 'Gross Profit', etc.
     // https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/    :)
@@ -29,12 +33,12 @@ export default function ForecastGroup(props) {
                 !props.expanded &&
                     props.group.data.nonToggled.map((row, i) => (
                         <div key={row.Id} className="row">
-                            <div style={{'fontWeight': 'bold'}}>{row.LineItem}</div>
-                            <div><Currency value={row.CurrentStartAmount + ''} /></div>
-                            <div><Currency value={row.CurrentEndAmount + ''} /></div>
-                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
-                            <div><Currency value={row.ForecastAmount + ''} /></div>
-                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div style={{'fontWeight': 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
+                            <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
+                            <div><Percent className="noAlign" value={row.ForecastPercentChange + ''} /></div>
+                            <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
+                            <div><Percent className="noAlign" value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }
@@ -51,11 +55,11 @@ export default function ForecastGroup(props) {
                 props.expanded &&
                     props.group.data.toggled.map((row, i) => (
                         <div key={row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
-                            <div style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{row.LineItem}</div>
-                            <div><Currency value={row.CurrentStartAmount + ''} /></div>
-                            <div><Currency value={row.CurrentEndAmount + ''} /></div>
+                            <div style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
+                            <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
                             <div><Percent value={row.ForecastPercentChange + ''} /></div>
-                            <div><Currency value={row.ForecastAmount + ''} /></div>
+                            <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
                             <div onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, row) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))

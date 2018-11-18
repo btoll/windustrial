@@ -9,7 +9,7 @@ export default function Spinner(props) {
             show={props.show}
         >
             <section>
-                <p>Please wait while we fetch the latest data...</p>
+                <p>{props.text || "Please wait while we fetch the latest data..."}</p>
                 <img src="/images/spinner.gif" alt="Spinner..." />
             </section>
         </Base>

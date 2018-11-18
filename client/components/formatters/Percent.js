@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function PercentAmount(props) {
+export default function Percent(props) {
     if (Number.isNaN(Number(props.value))) {
-        return <div className="mr-3"> - </div>;
+        return <div> - </div>;
     }
 
-    return <span>{Number(props.value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits:0})}</span>;
+    return <span className={props.className || ''}>{Number(props.value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2})}</span>;
 }
 
