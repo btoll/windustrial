@@ -471,17 +471,17 @@ export default class ForecastMain extends React.Component {
                         <div></div>
                         <div>Past</div>
                         <div>Current</div>
-                        <div></div>
+                        <div>Growth</div>
                         <div>Future</div>
-                        <div></div>
+                        <div class="small">Growth</div>
                     </div>
                     <div style={this.styles.subHeaderRow} className="row">
                         <div></div>
                         <div>mm/dd/yy to mm/dd/yy</div>
                         <div>mm/dd/yy to mm/dd/yy</div>
-                        <div>% +/-</div>
+                        <div>Rate</div>
                         <div>mm/dd/yy to mm/dd/yy</div>
-                        <div>% +/-</div>
+                        <div>Rate</div>
                     </div>
 
                     {
