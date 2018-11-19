@@ -3,10 +3,13 @@ import ReactModal from 'react-modal';
 import axios from 'axios';
 
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
-import ForecastGroup from './ForecastGroup';
+
 import ForecastActions from '../components/ForecastActions';
-import Confirm from './modal/Confirm';
+import ForecastGroup from './ForecastGroup';
+import ForecastNav from './ForecastNav';
 import ForecastOptions from './modal/ForecastOptions';
+
+import Confirm from './modal/Confirm';
 import Spinner from './modal/Spinner';
 
 const getForecastGroups = data => ({
@@ -92,7 +95,9 @@ export default class ForecastMain extends React.Component {
 
             // Note these must be uppercased to match the json fields' case!
             Description: '',
-            Notes: ''
+            Notes: '',
+
+            navID: 'scenarioPlanning'
         }
 
         this.styles = {
@@ -138,6 +143,8 @@ export default class ForecastMain extends React.Component {
         this.saveScenario = this.saveScenario.bind(this);
         this.updateForecastOptions = this.updateForecastOptions.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
+
+        this.navSelection = this.navSelection.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (Doesn't appear to be working.)
@@ -314,6 +321,14 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    navSelection(e) {
+        e.preventDefault();
+
+        this.setState({
+            navID: e.target.name
+        });
+    }
+
     renderGroup(groupName) {
         return (
             <div style={{'marginBottom': '30px'}} key={groupName}>
@@ -471,6 +486,11 @@ export default class ForecastMain extends React.Component {
                     onChangeText={this.changeText}
                     onCreateScenario={this.createScenario}
                     onUpdateScenario={this.updateScenario}
+                />
+
+                <ForecastNav
+                    navID={this.state.navID}
+                    onClick={this.navSelection}
                 />
 
                 <section id="groups">

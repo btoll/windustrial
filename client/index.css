@@ -142,31 +142,46 @@ section#banner h1 {
     margin: 0 0 0 100px;
     padding: 20px;
 }
-section#groups {
-    padding-right: 15px;
-    padding-left: 15px;
-    margin: 100px auto 0 270px;
+section#actions {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    margin: 10px 10px 10px 20px;
+    width: 240px;
 }
-section#groups h1 {
-    margin: 40px 0;
+section#actions h2 {
+    margin: 20px 0 0;
 }
-section#groups div.row {
-    display: flex;
-    flex-wrap: wrap;
-    /*
-    margin-right: -15px;
-    margin-left: -15px;
-    */
+section#actions form label {
+    font-weight: bold;
+    display: block;
 }
-section#groups div.row > div {
-    flex: 0 0 16.666667%;
-    max-width: 26.666667%;
-    width: 20.666667%;
+section#actions form input,
+section#actions form select,
+section#actions form textarea {
+    background: #eee;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: sans-serif;
+    padding: 4px;
+    min-width: 200px;
 }
-section#groups div.row div span {
-    display: inline-block;
-    text-align: right;
-    width: 120px;
+section#actions form select {
+    width: 212px;
+}
+section#actions form textarea {
+    height: 20px;
+}
+section#actions form input[type=submit] {
+    background: green;
+    border-radius: 20px;
+    border-width: 0;
+    color: white;
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 5px;
+    padding: 6px;
 }
 section#forecastOptions {
     padding: 10px 10px 10px 40px;
@@ -209,51 +224,67 @@ section#forecastOptions form input[type=submit] {
     padding: 4px 0;
     width: 80px;
 }
+section#groups {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin: 100px auto 0 270px;
+}
+section#groups h1 {
+    margin: 40px 0;
+}
+section#groups div.row {
+    display: flex;
+    flex-wrap: wrap;
+    /*
+    margin-right: -15px;
+    margin-left: -15px;
+    */
+}
+section#groups div.row > div {
+    flex: 0 0 16.666667%;
+    max-width: 26.666667%;
+    width: 20.666667%;
+}
+section#groups div.row div span {
+    display: inline-block;
+    text-align: right;
+    width: 120px;
+}
 
 /****************************************/
 /*                                      */
 /*                  Nav                 */
 /*                                      */
 /****************************************/
-section#actions {
-    position: fixed;
-    top: 100px;
-    left: 0;
-    margin: 10px 10px 10px 20px;
-    width: 240px;
+nav {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin: 0 0 0 300px;
 }
-section#actions h2 {
-    margin: 20px 0 0;
-}
-section#actions form label {
-    font-weight: bold;
-    display: block;
-}
-section#actions form input,
-section#actions form select,
-section#actions form textarea {
-    background: #eee;
-    border-radius: 5px;
+nav li {
     border: 1px solid #ccc;
-    font-family: sans-serif;
-    padding: 4px;
-    min-width: 200px;
+    display: inline-block;
+    margin: 0 4px;
+    list-style: none;
+    text-align: center;
 }
-section#actions form select {
-    width: 212px;
+nav li:hover {
 }
-section#actions form textarea {
-    height: 20px;
-}
-section#actions form input[type=submit] {
-    background: green;
-    border-radius: 20px;
-    border-width: 0;
-    color: white;
-    display: block;
-    font-size: 13px;
+nav a {
+    background-color: #eee;
+    color: #ccc;
     font-weight: bold;
-    margin: 5px;
-    padding: 6px;
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    width: 150px;
+}
+nav#scenarioPlanning li a[name=scenarioPlanning],
+nav#lobAnalysis li a[name=lobAnalysis],
+nav#operatingMetrics li a[name=operatingMetrics],
+nav#admin li a[name=admin] {
+    background-color: #c4decc;
+    border: 2px solid navy;
+    color: #000;
 }
 
