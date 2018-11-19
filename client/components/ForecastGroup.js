@@ -8,8 +8,11 @@ const prepareData = (onOpenModal, row, e) => {
     onOpenModal('forecastOptions', row, e);
 };
 
+// Some rows, like the totals, should not have the event bound to it.
+// The `nonToggled` list contains these rows, so if the id of the row
+// currently moused-over isn't in the list, don't bind it.
 const attachEvent = (props, row) =>
-    !props.group.data.nonToggled.filter(r => r.Id === row.Id).length
+    !props.group.data.nonToggled.filter(r => r.Id === row.Id).length;
 
 // This can be expanded to switch on different strings, but for now just do the one we need.
 const changeLineItem = s =>
@@ -36,9 +39,9 @@ export default function ForecastGroup(props) {
                             <div style={{'fontWeight': 'bold'}}>{changeLineItem(row.LineItem)}</div>
                             <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
                             <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
-                            <div><Percent className="noAlign" value={row.ForecastPercentChange + ''} /></div>
+                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
                             <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
-                            <div><Percent className="noAlign" value={row.ForecastPercentChange + ''} /></div>
+                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }

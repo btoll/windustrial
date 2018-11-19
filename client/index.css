@@ -3,6 +3,9 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.alignLeft {
+    text-align: left !important;
+}
 .noAlign {
     text-align: center !important;
 }

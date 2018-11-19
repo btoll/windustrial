@@ -145,6 +145,7 @@ export default class ForecastMain extends React.Component {
         this.updateScenario = this.updateScenario.bind(this);
 
         this.navSelection = this.navSelection.bind(this);
+        this.showDates = this.showDates.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (Doesn't appear to be working.)
@@ -370,6 +371,10 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    showDates() {
+        return `${(this.state.selectedScenario.CurrentStartDate || "mm/dd/yy")} to ${this.state.selectedScenario.CurrentEndDate || "mm/dd/yy"}`;
+    }
+
     toggleExpandCollapse(groupName) {
         this.setState(() =>
             this.state.expanded[groupName] = !this.state.expanded[groupName]
@@ -494,7 +499,7 @@ export default class ForecastMain extends React.Component {
                 />
 
                 <section id="groups">
-                    <h1>{this.state.selectedScenario.Company}</h1>
+                    <h1>{this.state.selectedScenario.Company || "Company Name"}</h1>
                     <div style={this.styles.headerRow} className="row">
                         <div></div>
                         <div>Past</div>
@@ -505,10 +510,10 @@ export default class ForecastMain extends React.Component {
                     </div>
                     <div style={this.styles.subHeaderRow} className="row">
                         <div></div>
-                        <div>mm/dd/yy to mm/dd/yy</div>
-                        <div>mm/dd/yy to mm/dd/yy</div>
+                        <div>{this.showDates()}</div>
+                        <div>{this.showDates()}</div>
                         <div>Rate</div>
-                        <div>mm/dd/yy to mm/dd/yy</div>
+                        <div>{this.showDates()}</div>
                         <div>Rate</div>
                     </div>
 

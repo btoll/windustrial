@@ -5,6 +5,6 @@ export default function Percent(props) {
         return <div> - </div>;
     }
 
-    return <span className={props.className || ''}>{Number(props.value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2})}</span>;
+    return <span className="alignLeft">{Number(props.value).toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2})}</span>;
 }
 
