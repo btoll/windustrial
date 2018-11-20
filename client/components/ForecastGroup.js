@@ -56,14 +56,14 @@ export default function ForecastGroup(props) {
             }
             {
                 props.expanded &&
-                    props.group.data.toggled.map((row, i) => (
+                    props.group.data.all.map((row, i) => (
                         <div key={row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
                             <div style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{changeLineItem(row.LineItem)}</div>
                             <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
                             <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
                             <div><Percent value={row.ForecastPercentChange + ''} /></div>
                             <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
-                            <div onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, row) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, Object.assign({}, row)) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }

@@ -227,6 +227,13 @@ section#forecastOptions form input[type=submit] {
     padding: 4px 0;
     width: 80px;
 }
+section#forecastOptions div.optionsNav div {
+    margin-left: 120px;
+}
+section#forecastOptions div.optionsNav a {
+    color: blue;
+    margin: 0 30px;
+}
 section#groups {
     padding-right: 15px;
     padding-left: 15px;
@@ -247,6 +254,11 @@ section#groups div.row > div {
     flex: 0 0 16.666667%;
     max-width: 26.666667%;
     width: 20.666667%;
+}
+/* Make the mouseover target smaller! */
+section#groups div.row > div:last-child,
+section#groups div.row > div:last-child span {
+    max-width: 50px;
 }
 section#groups div.row div span {
     display: inline-block;

@@ -12,12 +12,19 @@ import ForecastOptions from './modal/ForecastOptions';
 import Confirm from './modal/Confirm';
 import Spinner from './modal/Spinner';
 
-const getForecastGroups = data => ({
+/*
+ * data.all       - Used by expand/collaps functionaliy.
+ * data.untoggled - Used by expand/collaps functionaliy.
+ * data.toggled   - Used by `ForecastOptions` modal nav functionality.
+ */
+const getForecastGroups = data => {
+    return {
     'Gross Revenue': {
         data: (data => {
             const filtered = data.filter(d => d.GroupName === 'Gross Revenue')
             return {
-                toggled: filtered,
+                all: filtered,
+                toggled: filtered.slice(0, -1),
                 nonToggled: filtered.slice(-1)
             };
         })(data)
@@ -26,7 +33,8 @@ const getForecastGroups = data => ({
         data: (data => {
             const filtered = data.filter(d => d.GroupName === 'Non-Operating')
             return {
-                toggled: filtered,
+                all: filtered,
+                toggled: filtered.slice(0, -2),
                 nonToggled: filtered.slice(-2)
             };
         })(data)
@@ -35,7 +43,8 @@ const getForecastGroups = data => ({
         data: (data => {
             const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
             return {
-                toggled: filtered,
+                all: filtered,
+                toggled: filtered.slice(0, -2),
                 nonToggled: filtered.slice(-2)
             };
         })(data)
@@ -46,12 +55,44 @@ const getForecastGroups = data => ({
         data: (data => {
             const filtered = data.filter(d => !d.GroupName) // COGS
             return {
-                toggled: filtered,
+                all: filtered,
+                toggled: filtered.slice(0, -2),
                 nonToggled: filtered.slice(-2)
             };
         })(data)
     }
-});
+}};
+
+const growthPermutations = {
+    LongTermTrendOn: {
+        LongTermTrendOn: true,
+        ShortTermTrendOn: false,
+        MidRateGrowthOn: false,
+        OverideOn: false,
+        OveridePercentage: null
+    },
+    MidRateGrowthOn: {
+        LongTermTrendOn: false,
+        ShortTermTrendOn: false,
+        MidRateGrowthOn: true,
+        OverideOn: false,
+        OveridePercentage: null
+    },
+    ShortTermTrendOn: {
+        LongTermTrendOn: false,
+        ShortTermTrendOn: true,
+        MidRateGrowthOn: false,
+        OverideOn: false,
+        OveridePercentage: null
+    },
+    OverideOn: {
+        LongTermTrendOn: false,
+        ShortTermTrendOn: false,
+        MidRateGrowthOn: false,
+        OverideOn: true,
+        OveridePercentage: null
+    }
+};
 
 const resetScenario = {
     Id: 0,
@@ -91,13 +132,14 @@ export default class ForecastMain extends React.Component {
             scenarios: [],
             selectedScenario: {},
 
-            scenarioForecasts: [],
-
             // Note these must be uppercased to match the json fields' case!
             Description: '',
             Notes: '',
 
-            navID: 'scenarioPlanning'
+            navID: 'scenarioPlanning',
+            actionableRows: [] // This is lazy-loaded and used for navigating when the `ForecastOptions` modal is up.
+                               // These are the rows that will trigger the popup (the total rows do not).
+                               // See `navigateForecastOptions` function.
         }
 
         this.styles = {
@@ -141,10 +183,13 @@ export default class ForecastMain extends React.Component {
         this.changeText = this.changeText.bind(this);
         this.createScenario = this.createScenario.bind(this);
         this.saveScenario = this.saveScenario.bind(this);
-        this.updateForecastOptions = this.updateForecastOptions.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
 
+        this.navigateForecastOptions = this.navigateForecastOptions.bind(this);
+        this.updateForecastOptions = this.updateForecastOptions.bind(this);
+
         this.navSelection = this.navSelection.bind(this);
+        this.selectGrowth = this.selectGrowth.bind(this);
         this.showDates = this.showDates.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
@@ -202,19 +247,11 @@ export default class ForecastMain extends React.Component {
             })
             .then(res => {
                 const data = res.data;
-                const blacklistedKeys = ['ScenarioForecasts', 'ScenarioForecastOptions', 'ScenarioOverrides'];
 
                 this.setState({
-                    selectedScenario: (() => {
-                        const o = {};
-                        for (const key of Object.keys(data)) {
-                            if (!blacklistedKeys.includes(key)) {
-                                o[key] = data[key];
-                            }
-                        }
-                        return o;
-                    })(),
-                    forecastGroups: getForecastGroups(data.ScenarioForecasts)
+                    selectedScenario: Object.assign({}, data),
+                    forecastGroups: getForecastGroups(data.ScenarioForecasts),
+                    actionableRows: []
                 });
 
                 this.closeModal();
@@ -272,7 +309,8 @@ export default class ForecastMain extends React.Component {
             })
             .then(res => {
                 this.setState({
-                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
+                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
+                    actionableRows: []
                 });
 
                 // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
@@ -330,6 +368,54 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    // The event is bound to the parent div, so do nothing if the `target` isn't an anchor tag.
+    navigateForecastOptions(currentRow, e) {
+        e.preventDefault();
+
+        const target = e.target;
+
+        if (target.nodeName.toLowerCase() === 'a') {
+            let a = this.state.actionableRows.concat();
+
+            if (!a.length) {
+                const forecastGroups = this.state.forecastGroups;
+                a = [];
+
+                ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating'].forEach(groupName => {
+                    a = a.concat(forecastGroups[groupName].data.toggled);
+                });
+
+                this.setState({
+                    actionableRows: a
+                });
+            }
+
+            const indexOf = a.indexOf(currentRow);
+            let row;
+
+            if (target.text.toLowerCase() === 'previous') {
+                if (indexOf === 0) {
+                    window.alert('You are at the first item, there is no previous item!');
+                } else {
+                    row = a[indexOf - 1];
+                }
+            } else {
+                if (indexOf === a.length - 1) {
+                    window.alert('You are at the last item, there is no next item!');
+                } else {
+                    row = a[indexOf + 1];
+                }
+            }
+
+            if (row) {
+                this.setState({
+                    actionableRows: a, // It doesn't hurt to set this again, even if it was previously set by a ForecastOptions nav action.
+                    modal: Object.assign({}, this.state.modal, { data: row })
+                });
+            }
+        }
+    }
+
     renderGroup(groupName) {
         return (
             <div style={{'marginBottom': '30px'}} key={groupName}>
@@ -355,7 +441,7 @@ export default class ForecastMain extends React.Component {
                 'AuthorizationToken': this.state.authToken
             },
             data: Object.assign({}, {
-                ScenarioForecasts: scenarioForecasts
+//                ScenarioForecasts: scenarioForecasts
             }, this.state.selectedScenario)
         })
         .then(res => {
@@ -371,6 +457,24 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    selectGrowth(e) {
+        const target = e.currentTarget;
+        const isCustom = target.type === 'number';
+
+        // If the input is type="radio", then we need to mixin the `growthPermutation`.
+        const selectedForecastOption = Object.assign({}, this.state.modal.data.ScenarioForecastOptions.concat()[0], !isCustom ? growthPermutations[target.value] : {});
+
+        if (isCustom) {
+            selectedForecastOption.OveridePercentage = target.value / 100;
+        }
+
+        const row = Object.assign({}, this.state.modal.data, { ScenarioForecastOptions: [selectedForecastOption] });
+
+        this.setState({
+            modal: Object.assign({}, this.state.modal, { data: row })
+        });
+    }
+
     showDates() {
         return `${(this.state.selectedScenario.CurrentStartDate || "mm/dd/yy")} to ${this.state.selectedScenario.CurrentEndDate || "mm/dd/yy"}`;
     }
@@ -381,35 +485,22 @@ export default class ForecastMain extends React.Component {
         );
     }
 
-    updateForecastOptions(selectedForecastOption, e) {
+    updateForecastOptions(e) {
         // TODO: Should be better way to toggle spinner contents!
         e.preventDefault();
         this.closeModal();
         this.openModal('spinnerModal');
 
-        let found = false;
-        const target = e.currentTarget;
-        const scenarioForecasts = this.state.scenarioForecasts.map(scenarioForecast => {
-            if (selectedForecastOption.ScenarioForecastId === scenarioForecast.ScenarioForecastOptions.ScenarioForecastId) {
-                found = true
+        const selectedForecastOption = this.state.modal.data.ScenarioForecastOptions.concat()[0];
+        const scenarioForecasts = this.state.selectedScenario.ScenarioForecasts.map(scenarioForecast => {
+            const arr = scenarioForecast.ScenarioForecastOptions;
 
-                return {
-                    Id: selectedForecastOption.ScenarioForecastId,
-                    ScenarioId: this.state.selectedScenario.Id,
-                    ScenarioForecastOptions: [selectedForecastOption]
-                };
+            if (arr.length && selectedForecastOption.ScenarioForecastId === scenarioForecast.ScenarioForecastOptions[0].ScenarioForecastId) {
+                return Object.assign({}, scenarioForecast, { ScenarioForecastOptions: [selectedForecastOption] });
             }
 
             return scenarioForecast;
         });
-
-        if (!found) {
-            scenarioForecasts.push({
-                Id: selectedForecastOption.ScenarioForecastId,
-                ScenarioId: this.state.selectedScenario.Id,
-                ScenarioForecastOptions: [selectedForecastOption]
-            });
-        }
 
         axios({
             method: 'put',
@@ -417,16 +508,13 @@ export default class ForecastMain extends React.Component {
             headers: {
                 'AuthorizationToken': this.state.authToken
             },
-            data: Object.assign({}, {
-                ScenarioForecasts: scenarioForecasts
-            }, this.state.selectedScenario)
+            data: Object.assign({}, this.state.selectedScenario, {
+                ScenarioForecasts: scenarioForecasts // <--- Note the cases are different!!!
+            })
         })
         .then(res => {
-            const forecastGroups = getForecastGroups(res.data.ScenarioForecasts)
-
             this.setState({
-//                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-                forecastGroups
+                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
             });
 
             this.closeModal();
@@ -447,7 +535,8 @@ export default class ForecastMain extends React.Component {
         // TODO: What are `Revenue Center` and `Notes`?
         if (e.currentTarget.name === 'retrieveAnother') {
             this.setState({
-                selectedScenario: resetScenario
+                selectedScenario: resetScenario,
+                actionableRows: []
             });
         } else {
             // TODO: Should be better way to toggle spinner contents!
@@ -538,8 +627,10 @@ export default class ForecastMain extends React.Component {
                         this.state.modal.type === 'forecastOptions' &&
                             <ForecastOptions
                                 show={this.state.modal.show}
-                                data={this.state.modal.data}
+                                row={this.state.modal.data}
+                                onSelectGrowth={this.selectGrowth}
                                 onClose={this.closeModal}
+                                onNavigate={this.navigateForecastOptions}
                                 onSubmit={this.updateForecastOptions}
                             /> :
                         null
