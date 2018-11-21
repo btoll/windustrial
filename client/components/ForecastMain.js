@@ -10,6 +10,7 @@ import ForecastNav from './ForecastNav';
 import ForecastOptions from './modal/ForecastOptions';
 
 import Confirm from './modal/Confirm';
+import Notes from './modal/Notes';
 import Spinner from './modal/Spinner';
 
 /*
@@ -94,13 +95,19 @@ const growthPermutations = {
     }
 };
 
-const resetScenario = {
-    Id: 0,
-    CreatedDateTime: '',
+// Yes, both Description and Notes are in the outer and inner objects (for now)!
+const defaultScenario = {
+    actionableRows: [],
     Description: '',
-    LOB: '',
-    ModifiedDateTime: '',
-    Notes: ''
+    Notes: '',
+    selectedScenario: {
+        Id: 0,
+        CreatedDateTime: '',
+        Description: '',
+        LOB: '',
+        ModifiedDateTime: '',
+        Notes: ''
+    }
 };
 
 export default class ForecastMain extends React.Component {
@@ -182,6 +189,7 @@ export default class ForecastMain extends React.Component {
         this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
         this.createScenario = this.createScenario.bind(this);
+        this.resetScenario = this.resetScenario.bind(this);
         this.saveScenario = this.saveScenario.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
 
@@ -191,6 +199,7 @@ export default class ForecastMain extends React.Component {
         this.navSelection = this.navSelection.bind(this);
         this.selectGrowth = this.selectGrowth.bind(this);
         this.showDates = this.showDates.bind(this);
+        this.showNotes = this.showNotes.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (Doesn't appear to be working.)
@@ -206,12 +215,12 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    openModal(type, data, text, e) {
+    openModal(type, data, modalText, e) {
         this.setState({
             modal: {
                 data,
                 show: true,
-                text,
+                modalText,
                 type
             }
         });
@@ -230,9 +239,7 @@ export default class ForecastMain extends React.Component {
 //                this.openModal('confirmModal');
 //            } else {
 //                // TODO: What are `Revenue Center` and `Notes`?
-//                this.setState({
-//                    selectedScenario: resetScenario
-//                });
+//                this.setState(defaultScenario);
 //
 //                this.closeModal();
 //            }
@@ -269,22 +276,22 @@ export default class ForecastMain extends React.Component {
 
         this.setState({
             [e.currentTarget.name]: e.currentTarget.value,
-            selectedScenario
+            selectedScenario,
+            modal: Object.assign({}, this.state.modal, {
+                data: {
+                    name: e.currentTarget.name,
+                    text: e.currentTarget.value
+                }
+            })
         });
     }
 
     confirm(confirm, e) {
         if (confirm) {
-            this.saveScenario();
+            this.saveScenario(true);
+        } else {
+            this.resetScenario();
         }
-
-        this.setState({
-            Description: '',
-            Notes: '',
-            selectedScenario: resetScenario
-        });
-
-        this.closeModal();
     }
 
     createScenario(e) {
@@ -385,9 +392,10 @@ export default class ForecastMain extends React.Component {
                     a = a.concat(forecastGroups[groupName].data.toggled);
                 });
 
-                this.setState({
-                    actionableRows: a
-                });
+                // Note that the currentRow isn't the same object (yet) in the `actionableRows` list that was constructed
+                // from the forecastGroups.  It will be on subsequent navigations, but initially when the list is seeded
+                // we have to search through it manually and overwrite the `currentRow` that is passed to the event handler.
+                currentRow = a.filter(item => item.Id === currentRow.Id)[0];
             }
 
             const indexOf = a.indexOf(currentRow);
@@ -431,8 +439,16 @@ export default class ForecastMain extends React.Component {
         );
     }
 
-    saveScenario() {
+    resetScenario() {
+        this.setState(defaultScenario);
+        this.closeModal();
+    }
+
+    saveScenario(shouldReset) {
         this.openModal('spinnerModal', null, 'Please wait while we save your scenario');
+
+//        const foo = Object.assign({}, this.state.selectedScenario);
+//        console.log(JSON.stringify(foo));
 
         axios({
             method: 'put',
@@ -440,15 +456,18 @@ export default class ForecastMain extends React.Component {
             headers: {
                 'AuthorizationToken': this.state.authToken
             },
-            data: Object.assign({}, {
-//                ScenarioForecasts: scenarioForecasts
-            }, this.state.selectedScenario)
+            data: Object.assign({}, this.state.selectedScenario)
         })
         .then(res => {
-            this.setState({
+            let state = {
                 forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            });
+            }
 
+            if (shouldReset) {
+                state = Object.assign({}, state, defaultScenario);
+            }
+
+            this.setState(state);
             this.closeModal();
         })
         .catch(err => {
@@ -479,6 +498,15 @@ export default class ForecastMain extends React.Component {
         return `${(this.state.selectedScenario.CurrentStartDate || "mm/dd/yy")} to ${this.state.selectedScenario.CurrentEndDate || "mm/dd/yy"}`;
     }
 
+    showNotes(e) {
+        const target = e.currentTarget;
+
+        this.openModal('notesModal', {
+            name: target.innerHTML,
+            text: this.state.selectedScenario[target.innerHTML]
+        });
+    }
+
     toggleExpandCollapse(groupName) {
         this.setState(() =>
             this.state.expanded[groupName] = !this.state.expanded[groupName]
@@ -501,6 +529,11 @@ export default class ForecastMain extends React.Component {
 
             return scenarioForecast;
         });
+
+//        const foo = Object.assign({}, this.state.selectedScenario, {
+//            ScenarioForecasts: scenarioForecasts // <--- Note the cases are different!!!
+//        });
+//        console.log(JSON.stringify(foo));
 
         axios({
             method: 'put',
@@ -528,16 +561,13 @@ export default class ForecastMain extends React.Component {
     updateScenario(e) {
         e.preventDefault();
 
-//        if (this.state.Description || this.state.Notes) {
-//            this.openModal('confirmModal');
-//        }
-
         // TODO: What are `Revenue Center` and `Notes`?
         if (e.currentTarget.name === 'retrieveAnother') {
-            this.setState({
-                selectedScenario: resetScenario,
-                actionableRows: []
-            });
+            if (this.state.Description || this.state.Notes) {
+                this.openModal('confirmModal');
+            }
+//
+//            this.setState(defaultScenario);
         } else {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
@@ -580,6 +610,7 @@ export default class ForecastMain extends React.Component {
                     onChangeText={this.changeText}
                     onCreateScenario={this.createScenario}
                     onUpdateScenario={this.updateScenario}
+                    onShowNotes={this.showNotes}
                 />
 
                 <ForecastNav
@@ -632,6 +663,17 @@ export default class ForecastMain extends React.Component {
                                 onClose={this.closeModal}
                                 onNavigate={this.navigateForecastOptions}
                                 onSubmit={this.updateForecastOptions}
+                            /> :
+                        null
+                    }
+
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'notesModal' &&
+                            <Notes
+                                data={this.state.modal.data}
+                                show={this.state.modal.show}
+                                onChangeText={this.changeText}
+                                onDone={this.closeModal}
                             /> :
                         null
                     }

@@ -28,7 +28,6 @@ export default function ForecastGroup(props) {
                     <h3
                         onClick={props.onHeaderClick.bind(null, props.groupName)}
                         className="expanded"
-                        style={{'cursor': 'pointer'}}
                     >{props.groupName || 'COGS'}</h3>
 
             }
@@ -50,7 +49,6 @@ export default function ForecastGroup(props) {
                     <h3
                         onClick={props.onHeaderClick.bind(null, props.groupName)}
                         className="collapsed"
-                        style={{'cursor': 'pointer'}}
                     >{props.groupName || 'COGS'}</h3>
 
             }

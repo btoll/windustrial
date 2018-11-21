@@ -28,7 +28,7 @@ export default class ForecastActions extends React.Component {
                         </select>
                     </div>
                     <div>
-                        <label>Description</label>
+                        <label onClick={isSelected ? this.props.onShowNotes : () => {}} className="collapsed">Description</label>
                         <textarea
                             name="Description"
                             disabled={!isSelected}
@@ -65,7 +65,7 @@ export default class ForecastActions extends React.Component {
                         />
                     </div>
                     <div>
-                        <label>Notes</label>
+                        <label onClick={isSelected ? this.props.onShowNotes : () => {}} className="collapsed">Notes</label>
                         <textarea
                             name="Notes"
                             disabled={!isSelected}

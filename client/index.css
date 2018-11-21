@@ -13,6 +13,17 @@ body {
     font-size: 12px;
     font-weight: normal;
 }
+/* The content below may appear empty, but it's not! They are the toggle icons. */
+.expanded::after {
+    content: "▼ ";
+    cursor: pointer;
+}
+
+.collapsed::after {
+    content: " ▲";
+    cursor: pointer;
+    pointer-events: all;
+}
 
 .App {
   text-align: center;
@@ -40,6 +51,11 @@ body {
 
 .Percentage-custom {
     width: 50px;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* React Modal plugin */
@@ -98,36 +114,36 @@ body {
     box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
     transform: translate(-50%, -50%);
 }
+.notes section {
+    height: 25%;
+    width: 25%;
+}
+.notes section h3 {
+    margin: 10px;
+    text-align: center;
+}
+.notes section textarea {
+    border: 1px solid #000;
+    margin-left: 4%;
+}
+.notes section button {
+    background: green;
+    border-radius: 20px;
+    border-width: 0;
+    color: white;
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 10px auto 20px;
+    padding: 6px;
+    width: 90px;
+}
 .spinner div p {
     font-weight: bold;
 }
 /* TODO: The following rule is temporary! */
 .spinner section img {
     margin-left: 130px;
-}
-/*
-#modal-content #delete button + button {
-    margin-left: 10px;
-}
-#modal-content #spinner {
-    background: url(images/spinner.gif) no-repeat;
-    height: 50px;
-    width: 50px;
-}
-*/
-
-/* The content below may appear empty, but it's not! They are the toggle icons. */
-.expanded::after {
-    content: "▼ ";
-}
-
-.collapsed::after {
-    content: " ▲";
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 /****************************************/
@@ -158,6 +174,7 @@ section#actions h2 {
 section#actions form label {
     font-weight: bold;
     display: block;
+    pointer-events: none;   /* `click` event should only fire on `.collapsed::after` pseudo-element. */
 }
 section#actions form input,
 section#actions form select,

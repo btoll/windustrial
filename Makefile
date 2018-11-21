@@ -4,7 +4,7 @@
 DEVPORT = 3001
  SERVER = ./server/app.js
 
-.PHONY: clean dev prod start-server start-ui serve
+.PHONY: clean dev deploy start-server start-ui serve
 
 clean:
 	rm -rf bft.zip dist/
@@ -15,7 +15,7 @@ dev:
 	@sed -i 's/443/$(DEVPORT)/' $(CONFIG)
 	@echo "[make] Changed endpoint socket -> http://localhost:$(DEVPORT)"
 
-prod:
+deploy:
 	@sed -i 's/http:/https:/' $(CONFIG)
 	@sed -i 's/localhost/$(BFT)/' $(CONFIG)
 	@sed -i 's/$(DEVPORT)/443/' $(CONFIG)
