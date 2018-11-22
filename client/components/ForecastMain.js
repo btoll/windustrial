@@ -10,6 +10,7 @@ import ForecastNav from './ForecastNav';
 import ForecastOptions from './modal/ForecastOptions';
 
 import Confirm from './modal/Confirm';
+import Message from './modal/Message';
 import Notes from './modal/Notes';
 import Spinner from './modal/Spinner';
 
@@ -297,15 +298,23 @@ export default class ForecastMain extends React.Component {
     createScenario(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
+        const scenarioName = formData.get('scenarioName');
+        const scenarioDescription = formData.get('scenarioDescription');
+        const scenarioMonthEnd = formData.get('scenarioMonthEnd');
 
-//        if (this.state.Description || this.state.Notes) {
-//            this.openModal('confirmModal', (function (e) {
-//                this.createScenario(e);
-//            }.bind(this, e)));
-//        } else {
+        if (!scenarioName || !scenarioDescription || !scenarioMonthEnd) {
+            this.openModal('messageModal', {
+                message: 'The following cannot be blank:',
+                fields: [
+                    'Scenario Name',
+                    'Scenario Description',
+                    'Scenario End Date'
+                ]
+            });
+        } else {
             // TODO: Should be better way to toggle spinner contents!
-    //        this.closeModal();
-            this.openModal('spinnerModal');
+            this.closeModal();
+                this.openModal('spinnerModal');
 
             axios({
                 method: 'post',
@@ -327,7 +336,7 @@ export default class ForecastMain extends React.Component {
                 console.log(err);
                 this.closeModal();
             });
-//        }
+        }
     }
 
     getAllScenarios() {
@@ -565,9 +574,9 @@ export default class ForecastMain extends React.Component {
         if (e.currentTarget.name === 'retrieveAnother') {
             if (this.state.Description || this.state.Notes) {
                 this.openModal('confirmModal');
+            } else {
+                this.setState(defaultScenario);
             }
-//
-//            this.setState(defaultScenario);
         } else {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
@@ -619,7 +628,7 @@ export default class ForecastMain extends React.Component {
                 />
 
                 <section id="groups">
-                    <h1>{this.state.selectedScenario.Company || "Company Name"}</h1>
+                    <h1>{this.state.selectedScenario.CompanyName || "Company Name"}</h1>
                     <div style={this.styles.headerRow} className="row">
                         <div></div>
                         <div>Past</div>
@@ -663,6 +672,16 @@ export default class ForecastMain extends React.Component {
                                 onClose={this.closeModal}
                                 onNavigate={this.navigateForecastOptions}
                                 onSubmit={this.updateForecastOptions}
+                            /> :
+                        null
+                    }
+
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'messageModal' &&
+                            <Message
+                                data={this.state.modal.data}
+                                show={this.state.modal.show}
+                                onClose={this.closeModal}
                             /> :
                         null
                     }

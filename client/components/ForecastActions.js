@@ -1,5 +1,17 @@
 import React from 'react';
 
+//
+//                <h2>Update Scenario</h2>
+//                <p>This uploads current financial data to the selected scenario</p>
+//                <form>
+//                    <div>
+//                        <input
+//                            type="submit"
+//                            value="Upload Current Financial Data"
+//                        />
+//                    </div>
+//                </form>
+//
 export default class ForecastActions extends React.Component {
     constructor(props) {
         super(props);
@@ -122,21 +134,19 @@ export default class ForecastActions extends React.Component {
                         </select>
                     </div>
                     <div>
-                        <select>
+                        <select
+                            disabled={isSelected}
+                            onChange={this.props.onChangeScenario}
+                            value={this.props.selectedScenario.Id}
+                        >
                             <option value="0">Select scenario</option>
+                            {
+                                this.props.scenarios.map(scenario => (
+                                    <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
+                                ))
+                            }
                         </select>
                     </div>
-                    <div>
-                        <input
-                            type="submit"
-                            value="Upload Current Financial Data"
-                        />
-                    </div>
-                </form>
-
-                <h2>Update Scenario</h2>
-                <p>This uploads current financial data to the selected scenario</p>
-                <form>
                     <div>
                         <input
                             type="submit"
