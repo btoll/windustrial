@@ -35,12 +35,12 @@ export default function ForecastGroup(props) {
                 !props.expanded &&
                     props.group.data.nonToggled.map((row, i) => (
                         <div key={row.Id} className="row">
-                            <div style={{'fontWeight': 'bold'}}>{changeLineItem(row.LineItem)}</div>
-                            <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
-                            <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
-                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
-                            <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
-                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div className="col1" style={{'fontWeight': 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div className="col2"><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
+                            <div className="col3"><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
+                            <div className="col4"><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div className="col5"><Currency idx={i} value={row.ForecastAmount + ''} /></div>
+                            <div className="col6"><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }
@@ -55,13 +55,13 @@ export default function ForecastGroup(props) {
             {
                 props.expanded &&
                     props.group.data.all.map((row, i) => (
-                        <div key={row.Id} style={{'display': props.expanded ? 'flex' : 'none'}} className="row">
-                            <div style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{changeLineItem(row.LineItem)}</div>
-                            <div><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
-                            <div><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
-                            <div><Percent value={row.ForecastPercentChange + ''} /></div>
-                            <div><Currency idx={i} value={row.ForecastAmount + ''} /></div>
-                            <div onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, Object.assign({}, row)) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
+                        <div key={row.Id} className="row">
+                            <div className="col1" style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div className="col2"><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
+                            <div className="col3"><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
+                            <div className="col4"><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div className="col5"><Currency idx={i} value={row.ForecastAmount + ''} /></div>
+                            <div className="col6" onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, Object.assign({}, row)) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }

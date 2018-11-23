@@ -3,15 +3,8 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
-.alignLeft {
-    text-align: left !important;
-}
 .noAlign {
     text-align: center !important;
-}
-.small {
-    font-size: 12px;
-    font-weight: normal;
 }
 /* The content below may appear empty, but it's not! They are the toggle icons. */
 .expanded::after {
@@ -262,15 +255,28 @@ section#groups h1 {
 section#groups div.row {
     display: flex;
     flex-wrap: wrap;
-    /*
-    margin-right: -15px;
-    margin-left: -15px;
-    */
 }
 section#groups div.row > div {
     flex: 0 0 16.666667%;
-    max-width: 26.666667%;
-    width: 20.666667%;
+    margin: 0 40px;
+    max-width: 10%;
+    text-align: right;
+    width: 10%;
+}
+section#groups div.header.row > div.col4,
+section#groups div.header.row > div.col6 {
+    font-size: 12px;
+}
+section#groups div.row > div.col1 {
+    max-width: 30%;
+    text-align: left;
+    width: 30%;
+}
+section#groups div.row > div.col4,
+section#groups div.row > div.col6 {
+    font-weight: normal;
+    max-width: 5%;
+    width: 5%;
 }
 /* Make the mouseover target smaller! */
 section#groups div.row > div:last-child,
@@ -280,7 +286,6 @@ section#groups div.row > div:last-child span {
 section#groups div.row div span {
     display: inline-block;
     text-align: right;
-    width: 120px;
 }
 
 /****************************************/

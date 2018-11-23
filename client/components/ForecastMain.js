@@ -639,21 +639,21 @@ export default class ForecastMain extends React.Component {
 
                 <section id="groups">
                     <h1>{this.state.selectedScenario.CompanyName || "Company Name"}</h1>
-                    <div style={this.styles.headerRow} className="row">
-                        <div></div>
-                        <div>Past</div>
-                        <div>Current</div>
-                        <div className="small">Growth</div>
-                        <div>Future</div>
-                        <div className="small">Growth</div>
+                    <div style={this.styles.headerRow} className="header row">
+                        <div className="col1"></div>
+                        <div className="col2">Past</div>
+                        <div className="col3">Current</div>
+                        <div className="col4">Growth</div>
+                        <div className="col5">Future</div>
+                        <div className="col6">Growth</div>
                     </div>
-                    <div style={this.styles.subHeaderRow} className="row">
-                        <div></div>
-                        <div>{this.showDates()}</div>
-                        <div>{this.showDates()}</div>
-                        <div>Rate</div>
-                        <div>{this.showDates()}</div>
-                        <div>Rate</div>
+                    <div style={this.styles.subHeaderRow} className="header row">
+                        <div className="col1"></div>
+                        <div className="col2">{this.showDates()}</div>
+                        <div className="col3">{this.showDates()}</div>
+                        <div className="col4">Rate</div>
+                        <div className="col5">{this.showDates()}</div>
+                        <div className="col6">Rate</div>
                     </div>
 
                     {
