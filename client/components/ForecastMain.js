@@ -36,8 +36,8 @@ const getForecastGroups = data => {
             const filtered = data.filter(d => d.GroupName === 'Non-Operating')
             return {
                 all: filtered,
-                toggled: filtered.slice(0, -2),
-                nonToggled: filtered.slice(-2)
+                toggled: filtered.slice(0, -1),
+                nonToggled: filtered.slice(-1)
             };
         })(data)
     },
