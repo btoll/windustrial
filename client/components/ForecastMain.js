@@ -209,6 +209,14 @@ export default class ForecastMain extends React.Component {
 
     closeModal(e) {
         this.setState({
+            // For now, reset this b/c we need to re-create the `actionableRows` state every time the ForecastOptions
+            // modal is opened, else the `navigateForecastOptions` callback will be passed a row object that isn't
+            // in the `actionableRows` list and the navigation is then FUBAR'd.
+            // I THINK it's because we're not mutating state anywhere, and b/c of this the row objects in the lists
+            // will not continue to be the same object in between different operations.
+            actionableRows: [],
+            //
+            //
             modal: {
                 data: {},
                 show: false
@@ -427,7 +435,9 @@ export default class ForecastMain extends React.Component {
             if (row) {
                 this.setState({
                     actionableRows: a, // It doesn't hurt to set this again, even if it was previously set by a ForecastOptions nav action.
-                    modal: Object.assign({}, this.state.modal, { data: row })
+                    modal: Object.assign({}, this.state.modal, { data: row }),
+                    expanded: Object.assign({}, this.state.expanded, { [row.GroupName]: true }) // Automatically expand groups as user
+                                                                                                // navigages through them.
                 });
             }
         }
