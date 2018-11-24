@@ -14,6 +14,9 @@ import Message from './modal/Message';
 import Notes from './modal/Notes';
 import Spinner from './modal/Spinner';
 
+const formatDate = s =>
+    s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1.slice(-2)}`);
+
 /*
  * data.all       - Used by expand/collaps functionaliy.
  * data.untoggled - Used by expand/collaps functionaliy.
@@ -199,7 +202,7 @@ export default class ForecastMain extends React.Component {
 
         this.navSelection = this.navSelection.bind(this);
         this.selectGrowth = this.selectGrowth.bind(this);
-        this.showDates = this.showDates.bind(this);
+        this.showDate = this.showDate.bind(this);
         this.showNotes = this.showNotes.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
@@ -513,8 +516,8 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    showDates() {
-        return `${(this.state.selectedScenario.CurrentStartDate || "mm/dd/yy")} to ${this.state.selectedScenario.CurrentEndDate || "mm/dd/yy"}`;
+    showDate(field) {
+        return `${this.state.selectedScenario[field] && formatDate(this.state.selectedScenario[field]) || "mm/dd/yy"}`;
     }
 
     showNotes(e) {
@@ -643,17 +646,17 @@ export default class ForecastMain extends React.Component {
                         <div className="col1"></div>
                         <div className="col2">Past</div>
                         <div className="col3">Current</div>
-                        <div className="col4">Growth</div>
+                        <div className="col4"></div>
                         <div className="col5">Future</div>
-                        <div className="col6">Growth</div>
+                        <div className="col6"></div>
                     </div>
                     <div style={this.styles.subHeaderRow} className="header row">
                         <div className="col1"></div>
-                        <div className="col2">{this.showDates()}</div>
-                        <div className="col3">{this.showDates()}</div>
-                        <div className="col4">Rate</div>
-                        <div className="col5">{this.showDates()}</div>
-                        <div className="col6">Rate</div>
+                        <div className="col2">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
+                        <div className="col3">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
+                        <div className="col4">Growth<br />Rate</div>
+                        <div className="col5">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
+                        <div className="col6">Growth<br />Rate</div>
                     </div>
 
                     {

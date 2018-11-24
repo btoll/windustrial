@@ -258,7 +258,7 @@ section#groups div.row {
 }
 section#groups div.row > div {
     flex: 0 0 16.666667%;
-    margin: 0 40px;
+    margin: 0 2%;
     max-width: 10%;
     text-align: right;
     width: 10%;
