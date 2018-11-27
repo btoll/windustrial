@@ -17,7 +17,7 @@ export default function Currency(props) {
             props.idx === 0 || isDecimal ?
                 '$' :
             ''
-        ) + Number(d).toLocaleString('en-US', { style: 'decimal', currency: 'USD' })
+        ) + Number(Math.ceil(d)).toLocaleString('en-US', { style: 'decimal', currency: 'USD', minimumFractionDigits: 0 })
     }</span>;
 }
 

@@ -1,8 +1,5 @@
 import React from 'react';
 import ReactModal from 'react-modal';
-import axios from 'axios';
-
-import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 
 import ForecastActions from '../components/ForecastActions';
 import ForecastGroup from './ForecastGroup';
@@ -14,6 +11,8 @@ import Message from './modal/Message';
 import Notes from './modal/Notes';
 import Spinner from './modal/Spinner';
 
+import * as api from './api';
+
 const formatDate = s =>
     s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1.slice(-2)}`);
 
@@ -22,52 +21,6 @@ const formatDate = s =>
  * data.untoggled - Used by expand/collaps functionaliy.
  * data.toggled   - Used by `ForecastOptions` modal nav functionality.
  */
-const getForecastGroups = data => {
-    return {
-    'Gross Revenue': {
-        data: (data => {
-            const filtered = data.filter(d => d.GroupName === 'Gross Revenue')
-            return {
-                all: filtered,
-                toggled: filtered.slice(0, -1),
-                nonToggled: filtered.slice(-1)
-            };
-        })(data)
-    },
-    'Non-Operating': {
-        data: (data => {
-            const filtered = data.filter(d => d.GroupName === 'Non-Operating')
-            return {
-                all: filtered,
-                toggled: filtered.slice(0, -1),
-                nonToggled: filtered.slice(-1)
-            };
-        })(data)
-    },
-    'Sales, General, Admin Expenses': {
-        data: (data => {
-            const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
-            return {
-                all: filtered,
-                toggled: filtered.slice(0, -2),
-                nonToggled: filtered.slice(-2)
-            };
-        })(data)
-    },
-    // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
-    // ...should it be its own group?
-    '': {
-        data: (data => {
-            const filtered = data.filter(d => !d.GroupName) // COGS
-            return {
-                all: filtered,
-                toggled: filtered.slice(0, -2),
-                nonToggled: filtered.slice(-2)
-            };
-        })(data)
-    }
-}};
-
 const growthPermutations = {
     LongTermTrendOn: {
         LongTermTrendOn: true,
@@ -242,44 +195,7 @@ export default class ForecastMain extends React.Component {
         // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
-
-        // If button, the user would like to retrieve another scenario, simply "clear" the screen.
-//        if (e.currentTarget.nodeName.toLowerCase() === 'form') {
-//            e.preventDefault();
-//
-//            if (this.state.Description || this.state.Notes) {
-//                this.openModal('confirmModal');
-//            } else {
-//                // TODO: What are `Revenue Center` and `Notes`?
-//                this.setState(defaultScenario);
-//
-//                this.closeModal();
-//            }
-//        } else {
-            // Now get a specific scenario.
-            axios({
-                method: 'get',
-                url: `${SCENARIO_ENDPOINT_BASE}/${e.target.value}`,
-                headers: {
-                    'AuthorizationToken': this.state.authToken
-                }
-            })
-            .then(res => {
-                const data = res.data;
-
-                this.setState({
-                    selectedScenario: Object.assign({}, data),
-                    forecastGroups: getForecastGroups(data.ScenarioForecasts),
-                    actionableRows: []
-                });
-
-                this.closeModal();
-            })
-            .catch(err => {
-                console.log(err);
-                this.closeModal();
-            });
-//        }
+        api.changeScenario.call(this, e.target.value);
     }
 
     changeText(e) {
@@ -325,66 +241,60 @@ export default class ForecastMain extends React.Component {
         } else {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
-                this.openModal('spinnerModal');
-
-            axios({
-                method: 'post',
-                url: `${SCENARIO_ENDPOINT_BASE}/${formData.get('scenarioName')}/${formData.get('scenarioDescription')}/${formData.get('scenarioMonthEnd')}`,
-                headers: {
-                    'AuthorizationToken': this.state.authToken
-                }
-            })
-            .then(res => {
-                this.setState({
-                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts),
-                    actionableRows: []
-                });
-
-                // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-                this.getAllScenarios();
-            })
-            .catch(err => {
-                console.log(err);
-                this.closeModal();
-            });
+            this.openModal('spinnerModal');
+            api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd);
         }
     }
 
     getAllScenarios() {
-        // First, get all scenarios.
-        axios({
-            method: 'post',
-            url: AUTH,
-            auth: {
-                username: 'general@demo.com',
-                password: '4Testing$'
+        api.getAllScenarios.call(this);
+    }
+
+    getForecastGroups(data) {
+        return {
+            'Gross Revenue': {
+                data: (data => {
+                    const filtered = data.filter(d => d.GroupName === 'Gross Revenue')
+                    return {
+                        all: filtered,
+                        toggled: filtered.slice(0, -1),
+                        nonToggled: filtered.slice(-1)
+                    };
+                })(data)
+            },
+            'Non-Operating': {
+                data: (data => {
+                    const filtered = data.filter(d => d.GroupName === 'Non-Operating')
+                    return {
+                        all: filtered,
+                        toggled: filtered.slice(0, -1),
+                        nonToggled: filtered.slice(-1)
+                    };
+                })(data)
+            },
+            'Sales, General, Admin Expenses': {
+                data: (data => {
+                    const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
+                    return {
+                        all: filtered,
+                        toggled: filtered.slice(0, -2),
+                        nonToggled: filtered.slice(-2)
+                    };
+                })(data)
+            },
+            // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
+            // ...should it be its own group?
+            '': {
+                data: (data => {
+                    const filtered = data.filter(d => !d.GroupName) // COGS
+                    return {
+                        all: filtered,
+                        toggled: filtered.slice(0, -2),
+                        nonToggled: filtered.slice(-2)
+                    };
+                })(data)
             }
-        })
-        .then(res => {
-            const authToken = res.headers.authorizationtoken;
-
-            this.setState({
-                authToken: authToken
-            });
-
-            return axios({
-                method: 'get',
-                url: SCENARIO_ENDPOINT_BASE,
-                headers: {
-                    'AuthorizationToken': authToken
-                }
-            })
-        }).then(res => {
-            this.setState({
-                scenarios: res.data
-            });
-
-            this.closeModal();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+        };
     }
 
     navSelection(e) {
@@ -468,34 +378,7 @@ export default class ForecastMain extends React.Component {
 
     saveScenario(shouldReset) {
         this.openModal('spinnerModal', null, 'Please wait while we save your scenario');
-
-//        const foo = Object.assign({}, this.state.selectedScenario);
-//        console.log(JSON.stringify(foo));
-
-        axios({
-            method: 'put',
-            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            },
-            data: Object.assign({}, this.state.selectedScenario)
-        })
-        .then(res => {
-            let state = {
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            }
-
-            if (shouldReset) {
-                state = Object.assign({}, state, defaultScenario);
-            }
-
-            this.setState(state);
-            this.closeModal();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+        api.saveScenario.call(this, shouldReset, defaultScenario);
     }
 
     selectGrowth(e) {
@@ -540,44 +423,7 @@ export default class ForecastMain extends React.Component {
         e.preventDefault();
         this.closeModal();
         this.openModal('spinnerModal');
-
-        const selectedForecastOption = this.state.modal.data.ScenarioForecastOptions.concat()[0];
-        const scenarioForecasts = this.state.selectedScenario.ScenarioForecasts.map(scenarioForecast => {
-            const arr = scenarioForecast.ScenarioForecastOptions;
-
-            if (arr.length && selectedForecastOption.ScenarioForecastId === scenarioForecast.ScenarioForecastOptions[0].ScenarioForecastId) {
-                return Object.assign({}, scenarioForecast, { ScenarioForecastOptions: [selectedForecastOption] });
-            }
-
-            return scenarioForecast;
-        });
-
-//        const foo = Object.assign({}, this.state.selectedScenario, {
-//            ScenarioForecasts: scenarioForecasts // <--- Note the cases are different!!!
-//        });
-//        console.log(JSON.stringify(foo));
-
-        axios({
-            method: 'put',
-            url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
-            headers: {
-                'AuthorizationToken': this.state.authToken
-            },
-            data: Object.assign({}, this.state.selectedScenario, {
-                ScenarioForecasts: scenarioForecasts // <--- Note the cases are different!!!
-            })
-        })
-        .then(res => {
-            this.setState({
-                forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-            });
-
-            this.closeModal();
-        })
-        .catch(err => {
-            console.log(err);
-            this.closeModal();
-        });
+        api.updateForecastOptions.call(this);
     }
 
     updateScenario(e) {
@@ -594,26 +440,7 @@ export default class ForecastMain extends React.Component {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
             this.openModal('spinnerModal', null, 'Please wait while we save your scenario...');
-
-            axios({
-                method: 'put',
-                url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
-                headers: {
-                    'AuthorizationToken': this.state.authToken
-                },
-                data: Object.assign({}, this.state.selectedScenario)
-            })
-            .then(res => {
-                this.setState({
-                    forecastGroups: getForecastGroups(res.data.ScenarioForecasts)
-                })
-
-                this.closeModal();
-            })
-            .catch(err => {
-                console.log(err);
-                this.closeModal();
-            });
+            api.updateScenario.call(this);
         }
     }
 
