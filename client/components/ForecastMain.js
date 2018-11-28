@@ -227,7 +227,13 @@ export default class ForecastMain extends React.Component {
         const formData = new FormData(e.target);
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
-        const scenarioMonthEnd = formData.get('scenarioMonthEnd');
+        const scenarioMonthEnd =
+            // Format MM/DD/YY to YYYYMMDD.
+            formData.get('scenarioMonthEnd')
+            .replace(/^(\d{2})\/(\d{2})\/(\d{2})$/, (matched, month, day, year) => (
+                `20${year}${month}${day}`
+            ));
+        // TODO: Error checking for `scenarioMonthEnd` date!
 
         if (!scenarioName || !scenarioDescription || !scenarioMonthEnd) {
             this.openModal('messageModal', {

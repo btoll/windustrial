@@ -10,7 +10,7 @@ export default function ForecastOptions (props) {
     return (
         <Base
             className={`base forecastOptions ReactModal__Content__base`}
-            onCloseModal={() => {}}
+            onCloseModal={props.onClose}
             show={props.show}
         >
             <section id="forecastOptions">

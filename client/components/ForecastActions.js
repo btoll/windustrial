@@ -119,7 +119,7 @@ export default class ForecastActions extends React.Component {
                     </div>
                     <div>
                         <input
-                            placeholder="<scenario end date - YYYYMMDD>"
+                            placeholder="<scenario end date - mm/dd/yy>"
                             name="scenarioMonthEnd"
                         />
                     </div>
@@ -139,7 +139,7 @@ export default class ForecastActions extends React.Component {
                             onChange={this.props.onChangeScenario}
                             value={this.props.selectedScenario.Id}
                         >
-                            <option value="0">Select scenario</option>
+                            <option value="0">Select Revenue Center</option>
                             {
                                 this.props.scenarios.map(scenario => (
                                     <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
