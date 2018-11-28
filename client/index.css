@@ -259,33 +259,32 @@ section#groups div.row {
 section#groups div.row > div {
     flex: 0 0 16.666667%;
     margin: 0 2%;
-    max-width: 10%;
+    max-width: 6%;
     text-align: right;
-    width: 10%;
+    width: 6%;
+}
+section#groups div.row > div span {
+    display: inline-block;
+    text-align: right;
 }
 section#groups div.header.row > div.col4,
 section#groups div.header.row > div.col6 {
     font-size: 12px;
 }
 section#groups div.row > div.col1 {
-    max-width: 30%;
     text-align: left;
-    width: 30%;
+    max-width: 150%;
+}
+section#groups div.row > div.col2 {
+    margin-left: 30%;
+}
+section#groups div.row > div.col1 span {
+    text-align: left;
+    width: 150%;
 }
 section#groups div.row > div.col4,
 section#groups div.row > div.col6 {
     font-weight: normal;
-    max-width: 5%;
-    width: 5%;
-}
-/* Make the mouseover target smaller! */
-section#groups div.row > div:last-child,
-section#groups div.row > div:last-child span {
-    max-width: 50px;
-}
-section#groups div.row div span {
-    display: inline-block;
-    text-align: right;
 }
 
 /****************************************/

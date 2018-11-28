@@ -35,7 +35,7 @@ export default function ForecastGroup(props) {
                 !props.expanded &&
                     props.group.data.nonToggled.map((row, i) => (
                         <div key={row.Id} className="row">
-                            <div className="col1" style={{'fontWeight': 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div className="col1" style={{'fontWeight': 'bold'}}><span>{changeLineItem(row.LineItem)}</span></div>
                             <div className="col2"><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
                             <div className="col3"><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
                             <div className="col4"><Percent value={row.ForecastPercentChange + ''} /></div>
@@ -56,7 +56,7 @@ export default function ForecastGroup(props) {
                 props.expanded &&
                     props.group.data.all.map((row, i) => (
                         <div key={row.Id} className="row">
-                            <div className="col1" style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}>{changeLineItem(row.LineItem)}</div>
+                            <div className="col1" style={{'fontWeight': !row.LineItem.match(/(?:total .*|(?:net|gross) profit)/i) ? 'normal' : 'bold'}}><span>{changeLineItem(row.LineItem)}</span></div>
                             <div className="col2"><Currency idx={i} value={row.CurrentStartAmount + ''} /></div>
                             <div className="col3"><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
                             <div className="col4"><Percent value={row.ForecastPercentChange + ''} /></div>
