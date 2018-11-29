@@ -4,7 +4,7 @@ import Base from './Base';
 const toFixed = f =>
     Number.parseFloat(f * 100).toFixed(2)
 
-export default function ForecastOptions (props) {
+export default function ForecastOptions(props) {
     const forecastOption = props.row.ScenarioForecastOptions.concat()[0];
 
     return (
@@ -16,7 +16,7 @@ export default function ForecastOptions (props) {
             <section id="forecastOptions">
                 <h1>{props.row.LineItem}</h1>
 
-                <button onClick={props.onClose}>X</button>
+                <button className="close" onClick={props.onClose}>X</button>
                 <p>
                     Select an annual growth rate for this account
                     <span>(these are the current growth rates for this account)</span>
@@ -89,6 +89,7 @@ export default function ForecastOptions (props) {
                         <input
                             type="submit"
                             value="Go"
+                            className="green-large"
                         />
                     </div>
                     <div className="optionsNav">

@@ -1,17 +1,5 @@
 import React from 'react';
 
-//
-//                <h2>Update Scenario</h2>
-//                <p>This uploads current financial data to the selected scenario</p>
-//                <form>
-//                    <div>
-//                        <input
-//                            type="submit"
-//                            value="Upload Current Financial Data"
-//                        />
-//                    </div>
-//                </form>
-//
 export default class ForecastActions extends React.Component {
     constructor(props) {
         super(props);
@@ -25,19 +13,11 @@ export default class ForecastActions extends React.Component {
                 <h2>View Scenario</h2>
                 <form>
                     <div>
-                        <label>{isSelected ? 'Selected' : 'Retrieve'} scenario</label>
-                        <select
-                            disabled={isSelected}
-                            onChange={this.props.onChangeScenario}
-                            value={this.props.selectedScenario.Id}
-                        >
-                            <option value="0">Select scenario</option>
-                            {
-                                this.props.scenarios.map(scenario => (
-                                    <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
-                                ))
-                            }
-                        </select>
+                        <label>Scenario Name</label>
+                        <input
+                            disabled={true}
+                            value={this.props.selectedScenario.Name}
+                        />
                     </div>
                     <div>
                         <label onClick={isSelected ? this.props.onShowNotes : () => {}} className="collapsed">Description</label>
@@ -92,13 +72,14 @@ export default class ForecastActions extends React.Component {
                             disabled={!isSelected}
                             onClick={this.props.onUpdateScenario}
                             value="Save"
+                            className="green-small"
                         />
                         <input
                             type="submit"
                             name="retrieveAnother"
-                            disabled={!isSelected}
-                            onClick={this.props.onUpdateScenario}
-                            value="Retrieve Another"
+                            onClick={this.props.onOpenModal.bind(null, 'retrieveScenarioModal')}
+                            value="Retrieve a Scenario"
+                            className="green-small"
                         />
                     </div>
                 </form>
@@ -151,6 +132,7 @@ export default class ForecastActions extends React.Component {
                         <input
                             type="submit"
                             value="Upload Current Financial Data"
+                            className="green-small"
                         />
                     </div>
                 </form>

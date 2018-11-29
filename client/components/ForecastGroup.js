@@ -61,7 +61,7 @@ export default function ForecastGroup(props) {
                             <div className="col3"><Currency idx={i} value={row.CurrentEndAmount + ''} /></div>
                             <div className="col4"><Percent value={row.ForecastPercentChange + ''} /></div>
                             <div className="col5"><Currency idx={i} value={row.ForecastAmount + ''} /></div>
-                            <div className="col6" onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, Object.assign({}, row)) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
+                            <div className="col6" onMouseOver={attachEvent(props, row) ? prepareData.bind(null, props.onOpenModal, Object.assign({}, { data: row})) : () => {}}><Percent value={row.ForecastPercentChange + ''} /></div>
                         </div>
                     ))
             }

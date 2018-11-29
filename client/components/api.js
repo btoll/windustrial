@@ -38,7 +38,8 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd) {
         this.setState({
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
-            actionableRows: []
+            actionableRows: [],
+            selectedRetrievalRow: res.data.Id // Set this so scenario will be highlighted in `RetrieveScenario` modal.
         });
 
         // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).

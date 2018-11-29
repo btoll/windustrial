@@ -11,13 +11,37 @@ body {
     content: "▼ ";
     cursor: pointer;
 }
-
 .collapsed::after {
     content: " ▲";
     cursor: pointer;
     pointer-events: all;
 }
-
+.close {
+    background-color: white;
+    border-width: 0;
+    cursor: pointer;
+    font-size: 18px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+.green-small,
+.green-large {
+    background: green !important;
+    border-radius: 20px !important;
+    border-width: 0 !important;
+    color: white;
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 5px;
+    padding: 6px !important;
+}
+.green-large {
+    font-size: 20px;
+    margin: 30px auto;
+    padding: 4px 10px !important;
+}
 .App {
   text-align: center;
 }
@@ -131,6 +155,20 @@ body {
     padding: 6px;
     width: 90px;
 }
+.retrieveScenario tr.selectedRetrievalRow {
+    background-color: #759671; /* Yes, there's text here, it can't be seen b/c of a Vim plugin! */
+    color: white;
+}
+.retrieveScenario h1 {
+    text-align: center;
+}
+.retrieveScenario table {
+    border-collapse: collapse;
+    display: block;
+    height: 120px;
+    overflow: auto;
+}
+
 .spinner div p {
     font-weight: bold;
 }
@@ -185,29 +223,9 @@ section#actions form select {
 section#actions form textarea {
     height: 20px;
 }
-section#actions form input[type=submit] {
-    background: green;
-    border-radius: 20px;
-    border-width: 0;
-    color: white;
-    display: block;
-    font-size: 13px;
-    font-weight: bold;
-    margin: 5px;
-    padding: 6px;
-}
 section#forecastOptions {
     padding: 10px 10px 10px 40px;
     width: 450px;
-}
-section#forecastOptions button {
-    background-color: white;
-    border-width: 0;
-    cursor: pointer;
-    font-size: 18px;
-    position: absolute;
-    top: 10px;
-    right: 10px;
 }
 section#forecastOptions p {
     font-size: 16px;
@@ -224,18 +242,6 @@ section#forecastOptions form label {
     display: inline-block;
     font-size: 15px;
     margin: 5px 0 0 10px;
-}
-section#forecastOptions form input[type=submit] {
-    background: green;
-    border-radius: 20px;
-    border-width: 0;
-    color: white;
-    display: block;
-    font-size: 20px;
-    font-weight: bold;
-    margin: 30px auto;
-    padding: 4px 0;
-    width: 80px;
 }
 section#forecastOptions div.optionsNav div {
     margin-left: 120px;

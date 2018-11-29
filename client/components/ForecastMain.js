@@ -9,6 +9,7 @@ import ForecastOptions from './modal/ForecastOptions';
 import Confirm from './modal/Confirm';
 import Message from './modal/Message';
 import Notes from './modal/Notes';
+import RetrieveScenario from './modal/RetrieveScenario';
 import Spinner from './modal/Spinner';
 
 import * as api from './api';
@@ -95,6 +96,7 @@ export default class ForecastMain extends React.Component {
             percentages: [],
             scenarios: [],
             selectedScenario: {},
+            selectedRetrievalRow: '',
 
             // Note these must be uppercased to match the json fields' case!
             Description: '',
@@ -148,6 +150,7 @@ export default class ForecastMain extends React.Component {
         this.createScenario = this.createScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
         this.saveScenario = this.saveScenario.bind(this);
+        this.selectRetrievalRow = this.selectRetrievalRow.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
 
         this.navigateForecastOptions = this.navigateForecastOptions.bind(this);
@@ -180,22 +183,55 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    openModal(type, data, modalText, e) {
+    openModal(type, modalData, e) {
+        if (e) {
+            e.preventDefault();
+        // Duck typing!
+        } else if (modalData && modalData.preventDefault) {
+            modalData.preventDefault();
+        }
+
+        const [data, text] = (typeof modalData !== 'object') ?
+            [null, modalData] :
+            [modalData.data, modalData.text];
+
         this.setState({
             modal: {
                 data,
                 show: true,
-                modalText,
+                text,
                 type
             }
         });
     }
 
     changeScenario(e) {
-        // TODO: Should be better way to toggle spinner contents!
-        this.closeModal();
-        this.openModal('spinnerModal');
-        api.changeScenario.call(this, e.target.value);
+        const target = e.target;
+        let value;
+
+        if (target.nodeName.toLowerCase() === 'button') {
+            value = this.state.selectedRetrievalRow;
+        } else {
+            // User double-clicked on modal grid row.
+            value = target.value;
+
+            if (
+                target.parentNode &&
+                target.parentNode.nodeName.toLowerCase() === 'tr' &&
+                target.parentNode.classList.contains('retrieve-scenario-row')
+            ) {
+                value = target.parentNode.id;
+            }
+
+            // TODO: Should be better way to toggle spinner contents!
+        }
+
+        // We're disabling the submit button on the modal to try and prevent empty
+        // values when the <button> is clicked, but it's good to check `value` as well!
+        if (value) {
+            this.openModal('spinnerModal');
+            api.changeScenario.call(this, value);
+        }
     }
 
     changeText(e) {
@@ -224,6 +260,7 @@ export default class ForecastMain extends React.Component {
 
     createScenario(e) {
         e.preventDefault();
+
         const formData = new FormData(e.target);
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
@@ -237,12 +274,14 @@ export default class ForecastMain extends React.Component {
 
         if (!scenarioName || !scenarioDescription || !scenarioMonthEnd) {
             this.openModal('messageModal', {
-                message: 'The following cannot be blank:',
-                fields: [
-                    'Scenario Name',
-                    'Scenario Description',
-                    'Scenario End Date'
-                ]
+                data: {
+                    message: 'The following cannot be blank:',
+                    fields: [
+                        'Scenario Name',
+                        'Scenario Description',
+                        'Scenario End Date'
+                    ]
+                }
             });
         } else {
             // TODO: Should be better way to toggle spinner contents!
@@ -383,7 +422,7 @@ export default class ForecastMain extends React.Component {
     }
 
     saveScenario(shouldReset) {
-        this.openModal('spinnerModal', null, 'Please wait while we save your scenario');
+        this.openModal('spinnerModal', 'Please wait while we save your scenario');
         api.saveScenario.call(this, shouldReset, defaultScenario);
     }
 
@@ -405,6 +444,20 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    selectRetrievalRow(e) {
+        const target = e.target;
+
+        if (
+            target.parentNode &&
+            target.parentNode.nodeName.toLowerCase() === 'tr' &&
+            target.parentNode.classList.contains('retrieve-scenario-row')
+        ) {
+            this.setState({
+                selectedRetrievalRow: target.parentNode.id
+            });
+        }
+    }
+
     showDate(field) {
         return `${this.state.selectedScenario[field] && formatDate(this.state.selectedScenario[field]) || "mm/dd/yy"}`;
     }
@@ -413,8 +466,10 @@ export default class ForecastMain extends React.Component {
         const target = e.currentTarget;
 
         this.openModal('notesModal', {
-            name: target.innerHTML,
-            text: this.state.selectedScenario[target.innerHTML]
+            data: {
+                name: target.innerHTML,
+                text: this.state.selectedScenario[target.innerHTML]
+            }
         });
     }
 
@@ -464,6 +519,7 @@ export default class ForecastMain extends React.Component {
                     onChangeScenario={this.changeScenario}
                     onChangeText={this.changeText}
                     onCreateScenario={this.createScenario}
+                    onOpenModal={this.openModal}
                     onUpdateScenario={this.updateScenario}
                     onShowNotes={this.showNotes}
                 />
@@ -539,6 +595,19 @@ export default class ForecastMain extends React.Component {
                                 show={this.state.modal.show}
                                 onChangeText={this.changeText}
                                 onDone={this.closeModal}
+                            /> :
+                        null
+                    }
+
+                    {this.state.modal.show ?
+                        this.state.modal.type === 'retrieveScenarioModal' &&
+                            <RetrieveScenario
+                                scenarios={this.state.scenarios}
+                                show={this.state.modal.show}
+                                onChangeScenario={this.changeScenario}
+                                onSelectRetrievalRow={this.selectRetrievalRow}
+                                onClose={this.closeModal}
+                                selectedRetrievalRow={this.state.selectedRetrievalRow}
                             /> :
                         null
                     }
