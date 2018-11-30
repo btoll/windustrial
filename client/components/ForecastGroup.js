@@ -28,7 +28,7 @@ export default function ForecastGroup(props) {
                     <h3
                         onClick={props.onHeaderClick.bind(null, props.groupName)}
                         className="expanded"
-                    >{props.groupName || 'COGS'}</h3>
+                    >{props.groupName}</h3>
 
             }
             {
@@ -49,7 +49,7 @@ export default function ForecastGroup(props) {
                     <h3
                         onClick={props.onHeaderClick.bind(null, props.groupName)}
                         className="collapsed"
-                    >{props.groupName || 'COGS'}</h3>
+                    >{props.groupName}</h3>
 
             }
             {

@@ -79,13 +79,13 @@ export default class ForecastMain extends React.Component {
                 'Gross Revenue': false,
                 'Non-Operating': false,
                 'Sales, General, Admin Expenses': false,
-                '': false
+                'COGS': false
             },
             forecastGroups: {
                 'Gross Revenue': [],
                 'Non-Operating': [],
                 'Sales, General, Admin Expenses': [],
-                '': [] // COGS
+                'COGS': []
             },
             modal: {
                 data: {},
@@ -297,6 +297,16 @@ export default class ForecastMain extends React.Component {
 
     getForecastGroups(data) {
         return {
+            'COGS': {
+                data: (data => {
+                    const filtered = data.filter(d => d.GroupName === 'COGS')
+                    return {
+                        all: filtered,
+                        toggled: filtered.slice(0, -2),
+                        nonToggled: filtered.slice(-2)
+                    };
+                })(data)
+            },
             'Gross Revenue': {
                 data: (data => {
                     const filtered = data.filter(d => d.GroupName === 'Gross Revenue')
@@ -320,18 +330,6 @@ export default class ForecastMain extends React.Component {
             'Sales, General, Admin Expenses': {
                 data: (data => {
                     const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
-                    return {
-                        all: filtered,
-                        toggled: filtered.slice(0, -2),
-                        nonToggled: filtered.slice(-2)
-                    };
-                })(data)
-            },
-            // TODO: 'Owner Incentive' is grouped with COGS because it's GroupName is empty in the json response
-            // ...should it be its own group?
-            '': {
-                data: (data => {
-                    const filtered = data.filter(d => !d.GroupName) // COGS
                     return {
                         all: filtered,
                         toggled: filtered.slice(0, -2),
@@ -550,7 +548,7 @@ export default class ForecastMain extends React.Component {
 
                     {
                         !!this.state.selectedScenario.Id ?
-                            ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating']
+                            Object.keys(this.state.forecastGroups)
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
                     }
