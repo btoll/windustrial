@@ -4,13 +4,8 @@ import ReactModal from 'react-modal';
 import ForecastActions from '../components/ForecastActions';
 import ForecastGroup from './ForecastGroup';
 import ForecastNav from './ForecastNav';
-import ForecastOptions from './modal/ForecastOptions';
 
-import Confirm from './modal/Confirm';
-import Message from './modal/Message';
-import Notes from './modal/Notes';
-import RetrieveScenario from './modal/RetrieveScenario';
-import Spinner from './modal/Spinner';
+import Modal from './modal/Modal';
 
 import * as api from './api';
 
@@ -53,17 +48,24 @@ const growthPermutations = {
     }
 };
 
-// Yes, both Description and Notes are in the outer and inner objects (for now)!
 const defaultScenario = {
+    action: {}, // Remove the handlers.
     actionableRows: [],
-    Description: '',
-    Notes: '',
+    expanded: {
+        'Gross Revenue': false,
+        'Non-Operating': false,
+        'Sales, General, Admin Expenses': false,
+        'COGS': false
+    },
+    hardSave: false,
+    softSave: false,
     selectedScenario: {
         Id: 0,
         CreatedDateTime: '',
         Description: '',
         LOB: '',
         ModifiedDateTime: '',
+        Name: '',
         Notes: ''
     }
 };
@@ -98,9 +100,13 @@ export default class ForecastMain extends React.Component {
             selectedScenario: {},
             selectedRetrievalRow: '',
 
-            // Note these must be uppercased to match the json fields' case!
-            Description: '',
-            Notes: '',
+            softSave: false, // Will popup a Confirm modal when retrieving another scenario or saving when `true`.
+                             // Triggered when Description or Notes is changed (see `changeText` handler).
+
+            hardSave: false, // Will popup a Confirm modal when saving when value is `true`.
+                             // Triggered when a Forecast Option is changed (see `api.updateForecastOptions` function).
+
+            action: {}, // Holds the `confirm` handlers (both Yes and No).
 
             navID: 'scenarioPlanning',
             actionableRows: [] // This is lazy-loaded and used for navigating when the `ForecastOptions` modal is up.
@@ -119,23 +125,6 @@ export default class ForecastMain extends React.Component {
                 cursor: 'pointer',
                 fontSize: '12px',
 
-            },
-            parentRowTotal: {
-                marginBottom: '25px'
-            },
-            thickDivider: {
-                display: 'block',
-                borderWidth: '3px',
-                width: '70%',
-                marginTop: '0px',
-                marginBottom: '15px'
-            },
-            thinDivider: {
-                display: 'block',
-                borderWidth: '1px',
-                width: '70%',
-                marginTop: '0px',
-                marginBottom: '1px'
             }
         }
 
@@ -147,8 +136,9 @@ export default class ForecastMain extends React.Component {
 
         this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
-        this.createScenario = this.createScenario.bind(this);
+        this.maybeCreateScenario = this.maybeCreateScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
+        this.retrieveScenario = this.retrieveScenario.bind(this);
         this.saveScenario = this.saveScenario.bind(this);
         this.selectRetrievalRow = this.selectRetrievalRow.bind(this);
         this.updateScenario = this.updateScenario.bind(this);
@@ -239,8 +229,8 @@ export default class ForecastMain extends React.Component {
         selectedScenario[e.currentTarget.name] = e.currentTarget.value;
 
         this.setState({
-            [e.currentTarget.name]: e.currentTarget.value,
             selectedScenario,
+            softSave: true,
             modal: Object.assign({}, this.state.modal, {
                 data: {
                     name: e.currentTarget.name,
@@ -251,17 +241,20 @@ export default class ForecastMain extends React.Component {
     }
 
     confirm(confirm, e) {
+        const action = this.state.action;
+
         if (confirm) {
-            this.saveScenario(true);
+            if (action.yes) {
+                action.yes();
+            }
         } else {
-            this.resetScenario();
+            if (action.no) {
+                action.no();
+            }
         }
     }
 
-    createScenario(e) {
-        e.preventDefault();
-
-        const formData = new FormData(e.target);
+    createScenario(formData) {
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
         const scenarioMonthEnd =
@@ -338,6 +331,37 @@ export default class ForecastMain extends React.Component {
                 })(data)
             }
         };
+    }
+
+    // Used this pattern before at Sencha, continue?
+    maybeCreateScenario(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        if (this.state.softSave || this.state.hardSave) {
+            // TODO: Maybe put this elsewhere so it's not created every time this function is called.
+            const cb = this.createScenario.bind(this, formData);
+            this.state.action = {
+                no: cb,
+                yes: async () => {
+                    this.closeModal();
+                    this.openModal('spinnerModal', 'Please wait while we save your scenario');
+
+                    if (this.state.hardSave) {
+                        // TODO: This should be api.saveScenario when Steve gets his code in place!
+                        await api.updateScenario.call(this);
+                    } else {
+                        await api.updateScenario.call(this);
+                    }
+
+                    cb();
+                }
+            };
+
+            this.openModal('confirmModal');
+        } else {
+            this.createScenario(formData);
+        }
     }
 
     navSelection(e) {
@@ -419,9 +443,47 @@ export default class ForecastMain extends React.Component {
         this.closeModal();
     }
 
+    retrieveScenario(e) {
+        e.preventDefault();
+
+        if (this.state.softSave || this.state.hardSave) {
+            // TODO: Maybe put this elsewhere so it's not created every time this function is called.
+            const cb = this.openModal.bind(this, 'retrieveScenarioModal');
+            this.state.action = {
+                no: cb,
+                yes: async () => {
+                    this.closeModal();
+                    this.openModal('spinnerModal', 'Please wait while we save your scenario');
+
+                    if (this.state.hardSave) {
+                        // TODO: This should be api.saveScenario when Steve gets his code in place!
+                        await api.updateScenario.call(this);
+                    } else {
+                        await api.updateScenario.call(this);
+                    }
+
+                    cb();
+                }
+            };
+
+            this.openModal('confirmModal');
+        } else {
+            this.openModal('retrieveScenarioModal');
+        }
+    }
+
     saveScenario(shouldReset) {
-        this.openModal('spinnerModal', 'Please wait while we save your scenario');
-        api.saveScenario.call(this, shouldReset, defaultScenario);
+        if (this.state.hardSave) {
+            this.state.action.yes = () => {
+                this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                api.saveScenario.call(this, shouldReset, defaultScenario);
+            };
+
+            this.openModal('confirmModal');
+        } else {
+            this.openModal('spinnerModal', 'Please wait while we save your scenario');
+            api.saveScenario.call(this, shouldReset, defaultScenario);
+        }
     }
 
     selectGrowth(e) {
@@ -478,28 +540,33 @@ export default class ForecastMain extends React.Component {
     }
 
     updateForecastOptions(e) {
-        // TODO: Should be better way to toggle spinner contents!
         e.preventDefault();
+
+        // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
         api.updateForecastOptions.call(this);
     }
 
-    updateScenario(e) {
+    async updateScenario(e) {
         e.preventDefault();
 
-        // TODO: What are `Revenue Center` and `Notes`?
-        if (e.currentTarget.name === 'retrieveAnother') {
-            if (this.state.Description || this.state.Notes) {
-                this.openModal('confirmModal');
-            } else {
-                this.setState(defaultScenario);
-            }
+        if (this.state.hardSave) {
+            this.state.action.yes = () => {
+                this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                // TODO: This needs to be a POST!!
+//                api.createScenario.call(this, false, defaultScenario);
+                api.saveScenario.call(this, false, defaultScenario);
+            };
+
+            this.state.action.no = this.closeModal.bind(this);
+
+            this.openModal('confirmModal');
         } else {
-            // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
-            this.openModal('spinnerModal', null, 'Please wait while we save your scenario...');
-            api.updateScenario.call(this);
+            this.openModal('spinnerModal', 'Please wait while we save your scenario...');
+
+            await api.updateScenario.call(this);
         }
     }
 
@@ -516,7 +583,8 @@ export default class ForecastMain extends React.Component {
                     selectedScenario={this.state.selectedScenario}
                     onChangeScenario={this.changeScenario}
                     onChangeText={this.changeText}
-                    onCreateScenario={this.createScenario}
+                    onMaybeCreateScenario={this.maybeCreateScenario}
+                    onRetrieveScenario={this.retrieveScenario}
                     onOpenModal={this.openModal}
                     onUpdateScenario={this.updateScenario}
                     onShowNotes={this.showNotes}
@@ -548,75 +616,14 @@ export default class ForecastMain extends React.Component {
 
                     {
                         !!this.state.selectedScenario.Id ?
-                            Object.keys(this.state.forecastGroups)
+                            ['Gross Revenue', 'COGS', 'Sales, General, Admin Expenses', 'Non-Operating']
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
                     }
 
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'confirmModal' &&
-                            <Confirm
-                                show={this.state.modal.show}
-                                onClick={this.confirm}
-                                onClose={this.closeModal}
-                            /> :
-                        null
-                    }
-
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'forecastOptions' &&
-                            <ForecastOptions
-                                show={this.state.modal.show}
-                                row={this.state.modal.data}
-                                onSelectGrowth={this.selectGrowth}
-                                onClose={this.closeModal}
-                                onNavigate={this.navigateForecastOptions}
-                                onSubmit={this.updateForecastOptions}
-                            /> :
-                        null
-                    }
-
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'messageModal' &&
-                            <Message
-                                data={this.state.modal.data}
-                                show={this.state.modal.show}
-                                onClose={this.closeModal}
-                            /> :
-                        null
-                    }
-
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'notesModal' &&
-                            <Notes
-                                data={this.state.modal.data}
-                                show={this.state.modal.show}
-                                onChangeText={this.changeText}
-                                onDone={this.closeModal}
-                            /> :
-                        null
-                    }
-
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'retrieveScenarioModal' &&
-                            <RetrieveScenario
-                                scenarios={this.state.scenarios}
-                                show={this.state.modal.show}
-                                onChangeScenario={this.changeScenario}
-                                onSelectRetrievalRow={this.selectRetrievalRow}
-                                onClose={this.closeModal}
-                                selectedRetrievalRow={this.state.selectedRetrievalRow}
-                            /> :
-                        null
-                    }
-
-                    {this.state.modal.show ?
-                        this.state.modal.type === 'spinnerModal' &&
-                            <Spinner
-                                show={this.state.modal.show}
-                                text={this.state.modal.text}
-                            /> :
-                        null
+                    {
+                        this.state.modal.show &&
+                            <Modal app={this} />
                     }
                 </section>
             </>

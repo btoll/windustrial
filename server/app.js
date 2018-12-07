@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 require(path.join(__dirname, '/routes'))(app);
 
-app.listen(3001, () => {
-    console.log('Express listening on port 3001');
+app.listen(4001, () => {
+    console.log('Express listening on port 4001');
 });
 

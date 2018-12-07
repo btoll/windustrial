@@ -72,12 +72,13 @@ export default class ForecastActions extends React.Component {
                             disabled={!isSelected}
                             onClick={this.props.onUpdateScenario}
                             value="Save"
+                            style={!isSelected ? {"backgroundColor": "#ccc"} : {}}
                             className="green-small"
                         />
                         <input
                             type="submit"
                             name="retrieveAnother"
-                            onClick={this.props.onOpenModal.bind(null, 'retrieveScenarioModal')}
+                            onClick={this.props.onRetrieveScenario}
                             value="Retrieve a Scenario"
                             className="green-small"
                         />
@@ -85,7 +86,7 @@ export default class ForecastActions extends React.Component {
                 </form>
 
                 <h2>New Scenario</h2>
-                <form onSubmit={this.props.onCreateScenario}>
+                <form onSubmit={this.props.onMaybeCreateScenario}>
                     <div>
                         <input
                             placeholder="<enter scenario name>"
@@ -105,10 +106,12 @@ export default class ForecastActions extends React.Component {
                         />
                     </div>
                     <div>
-                        <select>
+                        <select
+                            disabled={!isSelected}
+                        >
                             <option value="0">Select LOB</option>
                             {
-                                ['Commercial Lines', 'Gross', 'Other'].map((name, i) => (
+                                isSelected && this.props.selectedScenario.Lobs.map((name, i) => (
                                     <option key={i} value={name}>{name}</option>
                                 ))
                             }

@@ -56,8 +56,8 @@ function getAllScenarios() {
         method: 'post',
         url: AUTH,
         auth: {
-            username: 'general@demo.com',
-            password: '4Testing$'
+            username: 'owner@alpha.com',
+            password: 'Alpha44*'
         }
     })
     .then(res => {
@@ -98,7 +98,10 @@ function saveScenario(shouldReset, defaultScenario) {
     })
     .then(res => {
         let state = {
-            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts)
+            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
+            // Let's always clear the "save" flags when saving!
+            hardSave: false,
+            softSave: false
         }
 
         if (shouldReset) {
@@ -138,6 +141,7 @@ function updateForecastOptions() {
     })
     .then(res => {
         this.setState({
+            hardSave: true,
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts)
         });
 
@@ -149,8 +153,8 @@ function updateForecastOptions() {
     });
 }
 
-function updateScenario() {
-    axios({
+async function updateScenario() {
+    await axios({
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
@@ -160,7 +164,10 @@ function updateScenario() {
     })
     .then(res => {
         this.setState({
-            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts)
+            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
+            // Let's always clear the "save" flags when updating!
+            hardSave: false,
+            softSave: false
         })
 
         this.closeModal();

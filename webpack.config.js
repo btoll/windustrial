@@ -4,9 +4,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     // `babel-polyfill` is needed for the generator in config.js and MUST be first in the array!
-    entry: {
-        main: './client/index.js'
-    },
+    entry: [
+        '@babel/polyfill',
+        './client/index.js'
+    ],
 
     // TODO: Make sure we're code splitting.
     // https://reactjs.org/docs/code-splitting.html
@@ -39,7 +40,7 @@ module.exports = {
     // loads the /popular assets or wherever you were when the refresh occurred.
     devServer: {
         historyApiFallback: true,
-        port: 3000
+        port: 4000
     },
 
     plugins: [
