@@ -385,7 +385,7 @@ export default class ForecastMain extends React.Component {
                 const forecastGroups = this.state.forecastGroups;
                 a = [];
 
-                ['Gross Revenue', '', 'Sales, General, Admin Expenses', 'Non-Operating'].forEach(groupName => {
+                ['Gross Revenue', 'COGS', 'Sales, General, Admin Expenses', 'Non-Operating'].forEach(groupName => {
                     a = a.concat(forecastGroups[groupName].data.toggled);
                 });
 
