@@ -48,6 +48,9 @@ body {
     margin: 30px auto;
     padding: 4px 10px !important;
 }
+.highlight:hover {
+    background-color: #ccc !important;
+}
 .small-text {
     font-size: 12px !important;
 }
@@ -277,6 +280,7 @@ section#groups h1 {
 section#groups div.row {
     display: flex;
     flex-wrap: wrap;
+    margin: 6px 0;
 }
 section#groups div.row > div {
     flex: 0 0 16.666667%;

@@ -54,7 +54,7 @@ const defaultScenario = {
     expanded: {
         'Gross Revenue': false,
         'Non-Operating': false,
-        'Sales, General, Admin Expenses': false,
+        'Sales,General,Admin Expenses': false,
         'COGS': false
     },
     hardSave: false,
@@ -80,13 +80,13 @@ export default class ForecastMain extends React.Component {
             expanded: {
                 'Gross Revenue': false,
                 'Non-Operating': false,
-                'Sales, General, Admin Expenses': false,
+                'Sales,General,Admin Expenses': false,
                 'COGS': false
             },
             forecastGroups: {
                 'Gross Revenue': [],
                 'Non-Operating': [],
-                'Sales, General, Admin Expenses': [],
+                'Sales,General,Admin Expenses': [],
                 'COGS': []
             },
             modal: {
@@ -320,7 +320,7 @@ export default class ForecastMain extends React.Component {
                     };
                 })(data)
             },
-            'Sales, General, Admin Expenses': {
+            'Sales,General,Admin Expenses': {
                 data: (data => {
                     const filtered = data.filter(d => d.GroupName.includes('Admin Expenses'))
                     return {
@@ -385,7 +385,7 @@ export default class ForecastMain extends React.Component {
                 const forecastGroups = this.state.forecastGroups;
                 a = [];
 
-                ['Gross Revenue', 'COGS', 'Sales, General, Admin Expenses', 'Non-Operating'].forEach(groupName => {
+                ['Gross Revenue', 'COGS', 'Sales,General,Admin Expenses', 'Non-Operating'].forEach(groupName => {
                     a = a.concat(forecastGroups[groupName].data.toggled);
                 });
 
@@ -616,7 +616,7 @@ export default class ForecastMain extends React.Component {
 
                     {
                         !!this.state.selectedScenario.Id ?
-                            ['Gross Revenue', 'COGS', 'Sales, General, Admin Expenses', 'Non-Operating']
+                            ['Gross Revenue', 'COGS', 'Sales,General,Admin Expenses', 'Non-Operating']
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
                     }
