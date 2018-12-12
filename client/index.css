@@ -285,9 +285,9 @@ section#groups div.row {
 section#groups div.row > div {
     flex: 0 0 16.666667%;
     margin: 0 2%;
-    max-width: 6%;
+    max-width: 8.25%;
     text-align: right;
-    width: 6%;
+    width: 8.25%;
 }
 section#groups div.row > div span {
     display: inline-block;
@@ -302,7 +302,7 @@ section#groups div.row > div.col1 {
     max-width: 150%;
 }
 section#groups div.row > div.col2 {
-    margin-left: 30%;
+    margin-left: 20%;
 }
 section#groups div.row > div.col1 span {
     text-align: left;
