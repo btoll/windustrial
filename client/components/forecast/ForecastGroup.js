@@ -1,8 +1,8 @@
 import React from 'react';
 
-import ForecastOptions from './modal/ForecastOptions';
-import Currency from './formatters/Currency';
-import Percent from './formatters/Percent';
+import ForecastOptions from '../modal/ForecastOptions';
+import Currency from '../formatters/Currency';
+import Percent from '../formatters/Percent';
 
 const prepareData = (onOpenModal, row, e) => {
     onOpenModal('forecastOptions', row, e);

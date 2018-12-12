@@ -312,6 +312,31 @@ section#groups div.row > div.col4,
 section#groups div.row > div.col6 {
     font-weight: normal;
 }
+section#login {
+    border: 1px solid #ccc;
+    margin: 40px 0 0 20px;
+    padding: 10px;
+    width: 25%;
+}
+section#login form {
+    background-color: #eee;
+    padding: 10px;
+}
+section#login form label {
+    display: inline-block;
+    margin: 5px 0;
+    width: 120px;
+}
+section#login form input[type=submit] {
+    background-color: lightblue;
+    border: 1px solid darkblue;
+    margin-top: 10px;
+}
+section#login form a {
+    color: darkblue;
+    display: inline-block;
+    margin: 5px 0 30px;
+}
 
 /****************************************/
 /*                                      */

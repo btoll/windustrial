@@ -3,7 +3,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    // `babel-polyfill` is needed for the generator in config.js and MUST be first in the array!
+    // `babel-polyfill` is needed for the generators and async/await.
     entry: [
         '@babel/polyfill',
         './client/index.js'

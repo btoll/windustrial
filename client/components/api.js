@@ -1,6 +1,41 @@
 import axios from 'axios';
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 
+function auth(email, password, cookies) {
+    axios({
+        method: 'post',
+        url: AUTH,
+        auth: {
+            username: email,
+            password
+        }
+    })
+    .then(res => {
+        const authToken = res.headers.authorizationtoken;
+
+        const d = new Date();
+        d.setTime(d.getTime() + (365*24*60*60*1000));
+
+        cookies.set('authToken', authToken, {
+            expires: d,
+            path: '/'
+        });
+
+        this.setState({
+            authToken: authToken
+        });
+    })
+    .catch(err => {
+        this.openModal('messageModal', {
+            data: {
+                message: 'Email and/or Password are not valid',
+                fields: [
+                ]
+            }
+        });
+    });
+}
+
 function changeScenario(id) {
     axios({
         method: 'get',
@@ -182,6 +217,7 @@ export {
     changeScenario,
     createScenario,
     getAllScenarios,
+    auth,
     saveScenario,
     updateForecastOptions,
     updateScenario

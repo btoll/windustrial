@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactModal from 'react-modal';
 
-import ForecastActions from '../components/ForecastActions';
+import ForecastActions from './ForecastActions';
 import ForecastGroup from './ForecastGroup';
 import ForecastNav from './ForecastNav';
 
-import Modal from './modal/Modal';
+import Modal from '../modal/Modal';
 
-import * as api from './api';
+import * as api from '../api';
 
 const formatDate = s =>
     s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1.slice(-2)}`);
