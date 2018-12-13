@@ -15,8 +15,7 @@ export default class Login extends React.Component {
         cookies = new Cookies();
 
         this.state = {
-            cookies: null,
-            authToken: cookies.get('authToken') || '',
+            authToken: cookies.get('authToken'),
             modal: {
                 data: {},
                 show: false,
@@ -115,7 +114,10 @@ export default class Login extends React.Component {
                 </section>
             </> :
 
-            <ForecastMain />;
+            <ForecastMain
+                authToken={this.state.authToken}
+                cookies={cookies}
+            />;
     }
 }
 

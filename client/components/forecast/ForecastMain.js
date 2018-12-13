@@ -5,8 +5,8 @@ import ForecastActions from './ForecastActions';
 import ForecastGroup from './ForecastGroup';
 import ForecastNav from './ForecastNav';
 
+import Login from '../Login';
 import Modal from '../modal/Modal';
-
 import * as api from '../api';
 
 const formatDate = s =>
@@ -75,7 +75,6 @@ export default class ForecastMain extends React.Component {
         super(props);
 
         this.state = {
-            authToken: '',
             dirty: false,
             expanded: {
                 'Gross Revenue': false,
@@ -134,7 +133,6 @@ export default class ForecastMain extends React.Component {
         this.closeModal = this.closeModal.bind(this);
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
-        this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
         this.maybeCreateScenario = this.maybeCreateScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
@@ -195,35 +193,6 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    changeScenario(e) {
-        const target = e.target;
-        let value;
-
-        if (target.nodeName.toLowerCase() === 'button') {
-            value = this.state.selectedRetrievalRow;
-        } else {
-            // User double-clicked on modal grid row.
-            value = target.value;
-
-            if (
-                target.parentNode &&
-                target.parentNode.nodeName.toLowerCase() === 'tr' &&
-                target.parentNode.classList.contains('retrieve-scenario-row')
-            ) {
-                value = target.parentNode.id;
-            }
-
-            // TODO: Should be better way to toggle spinner contents!
-        }
-
-        // We're disabling the submit button on the modal to try and prevent empty
-        // values when the <button> is clicked, but it's good to check `value` as well!
-        if (value) {
-            this.openModal('spinnerModal');
-            api.changeScenario.call(this, value);
-        }
-    }
-
     changeText(e) {
         const selectedScenario = Object.assign({}, this.state.selectedScenario);
         selectedScenario[e.currentTarget.name] = e.currentTarget.value;
@@ -257,6 +226,8 @@ export default class ForecastMain extends React.Component {
     createScenario(formData) {
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
+        const LOB = formData.get('LOB');
+        const revenueCenter = formData.get('revenueCenter');
         const scenarioMonthEnd =
             // Format MM/DD/YY to YYYYMMDD.
             formData.get('scenarioMonthEnd')
@@ -265,14 +236,15 @@ export default class ForecastMain extends React.Component {
             ));
         // TODO: Error checking for `scenarioMonthEnd` date!
 
-        if (!scenarioName || !scenarioDescription || !scenarioMonthEnd) {
+        if (!scenarioName || !scenarioDescription || !scenarioMonthEnd || !LOB) {
             this.openModal('messageModal', {
                 data: {
                     message: 'The following cannot be blank:',
                     fields: [
                         'Scenario Name',
                         'Scenario Description',
-                        'Scenario End Date'
+                        'Scenario End Date',
+                        'LOB'
                     ]
                 }
             });
@@ -280,12 +252,8 @@ export default class ForecastMain extends React.Component {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
             this.openModal('spinnerModal');
-            api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd);
+            api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter);
         }
-    }
-
-    getAllScenarios() {
-        api.getAllScenarios.call(this);
     }
 
     getForecastGroups(data) {
@@ -348,8 +316,7 @@ export default class ForecastMain extends React.Component {
                     this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
                     if (this.state.hardSave) {
-                        // TODO: This should be api.saveScenario when Steve gets his code in place!
-                        await api.updateScenario.call(this);
+                        await api.createScenario.call(this);
                     } else {
                         await api.updateScenario.call(this);
                     }
@@ -555,8 +522,7 @@ export default class ForecastMain extends React.Component {
             this.state.action.yes = () => {
                 this.openModal('spinnerModal', 'Please wait while we save your scenario');
                 // TODO: This needs to be a POST!!
-//                api.createScenario.call(this, false, defaultScenario);
-                api.saveScenario.call(this, false, defaultScenario);
+                api.createScenario.call(this, false, defaultScenario);
             };
 
             this.state.action.no = this.closeModal.bind(this);
@@ -571,7 +537,7 @@ export default class ForecastMain extends React.Component {
     }
 
     render() {
-        return (
+        return this.props.authToken ? (
             <>
                 <section id="banner">
                     <h1>Business Forecasting Tool</h1>
@@ -581,7 +547,6 @@ export default class ForecastMain extends React.Component {
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
                     selectedScenario={this.state.selectedScenario}
-                    onChangeScenario={this.changeScenario}
                     onChangeText={this.changeText}
                     onMaybeCreateScenario={this.maybeCreateScenario}
                     onRetrieveScenario={this.retrieveScenario}
@@ -627,12 +592,13 @@ export default class ForecastMain extends React.Component {
                     }
                 </section>
             </>
-        )
+        ) :
+            <Login authToken={this.props.authToken} />
     }
 
     componentDidMount() {
         this.openModal('spinnerModal');
-        this.getAllScenarios();
+        api.initCompany.call(this, this.props.authToken, this.props.cookies);
     }
 }
 

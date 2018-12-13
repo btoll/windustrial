@@ -106,9 +106,7 @@ export default class ForecastActions extends React.Component {
                         />
                     </div>
                     <div>
-                        <select
-                            disabled={!isSelected}
-                        >
+                        <select name="LOB">
                             <option value="0">Select LOB</option>
                             {
                                 isSelected && this.props.selectedScenario.Lobs.map((name, i) => (
@@ -118,11 +116,7 @@ export default class ForecastActions extends React.Component {
                         </select>
                     </div>
                     <div>
-                        <select
-                            disabled={isSelected}
-                            onChange={this.props.onChangeScenario}
-                            value={this.props.selectedScenario.Id}
-                        >
+                        <select name="revenueCenter">
                             <option value="0">Select Revenue Center</option>
                             {
                                 this.props.scenarios.map(scenario => (

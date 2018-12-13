@@ -61,12 +61,19 @@ function changeScenario(id) {
     });
 }
 
-function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd) {
+function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter) {
     axios({
         method: 'post',
-        url: `${SCENARIO_ENDPOINT_BASE}/${scenarioName}/${scenarioDescription}/${scenarioMonthEnd}`,
+        url: SCENARIO_ENDPOINT_BASE,
         headers: {
             'AuthorizationToken': this.state.authToken
+        },
+        data: {
+            ID: revenueCenter || null,
+            Name: scenarioName,
+            Description: scenarioDescription,
+            LOB,
+            MonthEnd: scenarioMonthEnd
         }
     })
     .then(res => {
@@ -86,38 +93,48 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd) {
     });
 }
 
-function getAllScenarios() {
+function getLOBS(authToken) {
+    return axios({
+        method: 'get',
+        url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
+    });
+}
+
+function initCompany(authToken, cookies) {
     axios({
-        method: 'post',
-        url: AUTH,
-        auth: {
-            username: 'owner@alpha.com',
-            password: 'Alpha44*'
+        method: 'get',
+        url: SCENARIO_ENDPOINT_BASE,
+        headers: {
+            'AuthorizationToken': authToken
         }
-    })
-    .then(res => {
-        const authToken = res.headers.authorizationtoken;
-
-        this.setState({
-            authToken: authToken
-        });
-
-        return axios({
-            method: 'get',
-            url: SCENARIO_ENDPOINT_BASE,
-            headers: {
-                'AuthorizationToken': authToken
-            }
-        })
     }).then(res => {
         this.setState({
             scenarios: res.data
         });
 
         this.closeModal();
+
+//        return axios({
+//            method: 'get',
+//            url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
+//            headers: {
+//                'AuthorizationToken': authToken
+//            }
+//        });
+//    }).then(res => {
+//        this.setState({
+//            scenarios: res.data
+//        });
     })
     .catch(err => {
-        console.log(err);
+        // 401 Unauthorized
+//        if (err.response.status !== 200) {
+//            cookies.remove('authToken');
+//
+//            this.setState({
+//                authToken: null
+//            });
+//        }
         this.closeModal();
     });
 }
@@ -213,11 +230,12 @@ async function updateScenario() {
     });
 }
 
+// TODO: saveScenario and updateScenario do the same thing, doh!!
 export {
+    auth,
     changeScenario,
     createScenario,
-    getAllScenarios,
-    auth,
+    initCompany,
     saveScenario,
     updateForecastOptions,
     updateScenario

@@ -31,6 +31,11 @@ The UI is bootstrapped using webpack on port 3000.  To view, simply:
 
 The [Express] web framework is handling the network requests and runs on port 3001.
 
+## Login
+
+owner@alpha.com
+Alpha44*
+
 [Node.js]: https://nodejs.org/en/
 [npm]: https://www.npmjs.com/
 [webpack]: https://webpack.js.org/
