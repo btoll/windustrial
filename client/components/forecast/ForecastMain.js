@@ -75,6 +75,8 @@ export default class ForecastMain extends React.Component {
         super(props);
 
         this.state = {
+            loggedIn: true,
+
             dirty: false,
             expanded: {
                 'Gross Revenue': false,
@@ -96,6 +98,7 @@ export default class ForecastMain extends React.Component {
             },
             percentages: [],
             scenarios: [],
+            LOBS: [],
             selectedScenario: {},
             selectedRetrievalRow: '',
 
@@ -133,6 +136,7 @@ export default class ForecastMain extends React.Component {
         this.closeModal = this.closeModal.bind(this);
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
+        this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
         this.maybeCreateScenario = this.maybeCreateScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
@@ -209,6 +213,13 @@ export default class ForecastMain extends React.Component {
         });
     }
 
+    changeScenario(e) {
+        // TODO: Should be better way to toggle spinner contents!
+        this.closeModal();
+        this.openModal('spinnerModal');
+        api.changeScenario.call(this);
+    }
+
     confirm(confirm, e) {
         const action = this.state.action;
 
@@ -232,7 +243,7 @@ export default class ForecastMain extends React.Component {
             // Format MM/DD/YY to YYYYMMDD.
             formData.get('scenarioMonthEnd')
             .replace(/^(\d{2})\/(\d{2})\/(\d{2})$/, (matched, month, day, year) => (
-                `20${year}${month}${day}`
+                `20${year}-${month}-${day}`
             ));
         // TODO: Error checking for `scenarioMonthEnd` date!
 
@@ -522,7 +533,7 @@ export default class ForecastMain extends React.Component {
             this.state.action.yes = () => {
                 this.openModal('spinnerModal', 'Please wait while we save your scenario');
                 // TODO: This needs to be a POST!!
-                api.createScenario.call(this, false, defaultScenario);
+                api.updateScenario.call(this, false, defaultScenario);
             };
 
             this.state.action.no = this.closeModal.bind(this);
@@ -537,7 +548,7 @@ export default class ForecastMain extends React.Component {
     }
 
     render() {
-        return this.props.authToken ? (
+        return this.props.authToken && this.state.loggedIn ? (
             <>
                 <section id="banner">
                     <h1>Business Forecasting Tool</h1>
@@ -546,6 +557,7 @@ export default class ForecastMain extends React.Component {
                 <ForecastActions
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
+                    LOBS={this.state.LOBS}
                     selectedScenario={this.state.selectedScenario}
                     onChangeText={this.changeText}
                     onMaybeCreateScenario={this.maybeCreateScenario}
@@ -598,7 +610,8 @@ export default class ForecastMain extends React.Component {
 
     componentDidMount() {
         this.openModal('spinnerModal');
-        api.initCompany.call(this, this.props.authToken, this.props.cookies);
+        api.getAllScenarios.call(this);
+        api.getLOBS.call(this);
     }
 }
 

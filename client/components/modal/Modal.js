@@ -2,6 +2,7 @@ import React from 'react';
 import Base from './Base';
 
 import Confirm from './Confirm';
+import Error from './Error';
 import ForecastOptions from './ForecastOptions';
 import Message from './Message';
 import Notes from './Notes';
@@ -20,6 +21,13 @@ export default function Modal(props) {
                 softSave={state.softSave}
                 hardSave={state.hardSave}
                 onClick={app.confirm}
+                onClose={app.closeModal}
+            />
+
+        case 'errorModal':
+            return <Error
+                text={modal.text}
+                show={modal.show}
                 onClose={app.closeModal}
             />
 

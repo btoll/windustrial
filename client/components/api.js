@@ -14,7 +14,7 @@ function auth(email, password, cookies) {
         const authToken = res.headers.authorizationtoken;
 
         const d = new Date();
-        d.setTime(d.getTime() + (365*24*60*60*1000));
+        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
 
         cookies.set('authToken', authToken, {
             expires: d,
@@ -25,23 +25,17 @@ function auth(email, password, cookies) {
             authToken: authToken
         });
     })
-    .catch(err => {
-        this.openModal('messageModal', {
-            data: {
-                message: 'Email and/or Password are not valid',
-                fields: [
-                ]
-            }
-        });
+    .catch(() => {
+        this.openModal('errorModal', 'Email and/or Password are not valid');
     });
 }
 
-function changeScenario(id) {
+function changeScenario() {
     axios({
         method: 'get',
-        url: `${SCENARIO_ENDPOINT_BASE}/${id}`,
+        url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedRetrievalRow}`,
         headers: {
-            'AuthorizationToken': this.state.authToken
+            'AuthorizationToken': this.props.authToken
         }
     })
     .then(res => {
@@ -56,8 +50,44 @@ function changeScenario(id) {
         this.closeModal();
     })
     .catch(err => {
-        console.log(err);
-        this.closeModal();
+        this.openModal('errorModal', err.message);
+    });
+}
+
+function poll() {
+    axios({
+        method: 'post',
+        url: SCENARIO_ENDPOINT_BASE,
+        headers: {
+            'AuthorizationToken': this.props.authToken
+        },
+        data: {
+            Id: null,
+            Name: "",
+            Description: "",
+            LOB: "",
+            MonthEnd: "2018-03-01"
+        },
+        timeout: 5000
+    })
+    .then(res => {
+        this.setState({
+            selectedScenario: Object.assign({}, res.data),
+            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
+            actionableRows: [],
+            selectedRetrievalRow: res.data.Id // Set this so scenario will be highlighted in `RetrieveScenario` modal.
+        });
+
+        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
+        getAllScenarios();
+    })
+    .catch(err => {
+        this.openModal('errorModal', err.message);
+        /*
+        if (err.code === 'ECONNABORTED') {
+            poll.call(this);
+        }
+        */
     });
 }
 
@@ -66,17 +96,19 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
         method: 'post',
         url: SCENARIO_ENDPOINT_BASE,
         headers: {
-            'AuthorizationToken': this.state.authToken
+            'AuthorizationToken': this.props.authToken
         },
         data: {
-            ID: revenueCenter || null,
+            Id: revenueCenter || null,
             Name: scenarioName,
             Description: scenarioDescription,
             LOB,
             MonthEnd: scenarioMonthEnd
-        }
+        },
+//        timeout: 3000
     })
     .then(res => {
+//        poll.call(this, res.data.Id);
         this.setState({
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
@@ -88,24 +120,50 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
         this.getAllScenarios();
     })
     .catch(err => {
-        console.log(err);
-        this.closeModal();
+//        if (err.code === 'ECONNABORTED') {
+//            poll.call(this);
+//        }
+        this.openModal('errorModal', err.message);
     });
 }
 
-function getLOBS(authToken) {
-    return axios({
+function getLOBS() {
+    axios({
         method: 'get',
         url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
+        headers: {
+            'AuthorizationToken': this.props.authToken
+        }
+    }).then(res => {
+        this.setState({
+            LOBS: res.data
+        });
+
+        this.closeModal();
+    })
+    .catch(err => {
+        let e = err.message;
+
+        // 401 Unauthorized
+        if (err.response.status === 401) {
+            this.props.cookies.remove('authToken');
+            e = 'Your session has timed out, please login again';
+
+            this.setState({
+                loggedIn: false
+            });
+        }
+
+        this.openModal('errorModal', e);
     });
 }
 
-function initCompany(authToken, cookies) {
+function getAllScenarios() {
     axios({
         method: 'get',
         url: SCENARIO_ENDPOINT_BASE,
         headers: {
-            'AuthorizationToken': authToken
+            'AuthorizationToken': this.props.authToken
         }
     }).then(res => {
         this.setState({
@@ -113,29 +171,21 @@ function initCompany(authToken, cookies) {
         });
 
         this.closeModal();
-
-//        return axios({
-//            method: 'get',
-//            url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
-//            headers: {
-//                'AuthorizationToken': authToken
-//            }
-//        });
-//    }).then(res => {
-//        this.setState({
-//            scenarios: res.data
-//        });
     })
     .catch(err => {
+        let e = err.message;
+
         // 401 Unauthorized
-//        if (err.response.status !== 200) {
-//            cookies.remove('authToken');
-//
-//            this.setState({
-//                authToken: null
-//            });
-//        }
-        this.closeModal();
+        if (err.response.status === 401) {
+            this.props.cookies.remove('authToken');
+            e = 'Your session has timed out, please login again';
+
+            this.setState({
+                loggedIn: false
+            });
+        }
+
+        this.openModal('errorModal', e);
     });
 }
 
@@ -144,7 +194,7 @@ function saveScenario(shouldReset, defaultScenario) {
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
-            'AuthorizationToken': this.state.authToken
+            'AuthorizationToken': this.props.authToken
         },
         data: Object.assign({}, this.state.selectedScenario)
     })
@@ -164,8 +214,7 @@ function saveScenario(shouldReset, defaultScenario) {
         this.closeModal();
     })
     .catch(err => {
-        console.log(err);
-        this.closeModal();
+        this.openModal('errorModal', err.message);
     });
 }
 
@@ -185,7 +234,7 @@ function updateForecastOptions() {
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
-            'AuthorizationToken': this.state.authToken
+            'AuthorizationToken': this.props.authToken
         },
         data: Object.assign({}, this.state.selectedScenario, {
             ScenarioForecasts: scenarioForecasts // <--- Note the cases are different!!!
@@ -200,8 +249,7 @@ function updateForecastOptions() {
         this.closeModal();
     })
     .catch(err => {
-        console.log(err);
-        this.closeModal();
+        this.openModal('errorModal', err.message);
     });
 }
 
@@ -210,7 +258,7 @@ async function updateScenario() {
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
-            'AuthorizationToken': this.state.authToken
+            'AuthorizationToken': this.props.authToken
         },
         data: Object.assign({}, this.state.selectedScenario)
     })
@@ -225,8 +273,7 @@ async function updateScenario() {
         this.closeModal();
     })
     .catch(err => {
-        console.log(err);
-        this.closeModal();
+        this.openModal('errorModal', err.message);
     });
 }
 
@@ -235,7 +282,8 @@ export {
     auth,
     changeScenario,
     createScenario,
-    initCompany,
+    getAllScenarios,
+    getLOBS,
     saveScenario,
     updateForecastOptions,
     updateScenario

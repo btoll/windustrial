@@ -107,9 +107,9 @@ export default class ForecastActions extends React.Component {
                     </div>
                     <div>
                         <select name="LOB">
-                            <option value="0">Select LOB</option>
+                            <option value="">Select LOB</option>
                             {
-                                isSelected && this.props.selectedScenario.Lobs.map((name, i) => (
+                                this.props.LOBS.map((name, i) => (
                                     <option key={i} value={name}>{name}</option>
                                 ))
                             }
@@ -117,7 +117,7 @@ export default class ForecastActions extends React.Component {
                     </div>
                     <div>
                         <select name="revenueCenter">
-                            <option value="0">Select Revenue Center</option>
+                            <option value="">Select Revenue Center</option>
                             {
                                 this.props.scenarios.map(scenario => (
                                     <option key={scenario.Id} value={scenario.Id}>{scenario.Name}, {scenario.Description}</option>
