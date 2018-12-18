@@ -408,4 +408,9 @@ nav#admin li a[name=admin] {
     border: 2px solid navy;
     color: #000;
 }
+nav li a[name=logout] {
+    background-color: white;
+    border: 2px solid black;
+    color: blue;
+}
 

@@ -8,6 +8,7 @@ export default function ForecastNav(props) {
                 <li><a name="lobAnalysis" href="#">LOB Analysis</a></li>
                 <li><a name="operatingMetrics" href="#">Operating Metrics</a></li>
                 <li><a name="admin" href="#">Admin</a></li>
+                <li><a name="logout" href="#">Logout</a></li>
             </ul>
         </nav>
     );

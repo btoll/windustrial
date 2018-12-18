@@ -345,9 +345,18 @@ export default class ForecastMain extends React.Component {
     navSelection(e) {
         e.preventDefault();
 
-        this.setState({
-            navID: e.target.name
-        });
+        const name = e.target.name;
+
+        if (name) {
+            if (name === 'logout') {
+                this.props.cookies.remove('authToken');
+            }
+
+            this.setState({
+                loggedIn: name !== 'logout',
+                navID: name
+            });
+        }
     }
 
     // The event is bound to the parent div, so do nothing if the `target` isn't an anchor tag.
