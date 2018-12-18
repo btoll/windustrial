@@ -117,7 +117,7 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
         });
 
         // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        this.getAllScenarios();
+        getAllScenarios.call(this);
     })
     .catch(err => {
 //        if (err.code === 'ECONNABORTED') {
