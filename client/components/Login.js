@@ -90,6 +90,7 @@ export default class Login extends React.Component {
                             <label htmlFor="email">Email</label>
                             <input
                                 name="email"
+                                autoFocus={true}
                             />
                         </div>
                         <div>

@@ -26,7 +26,7 @@ export default function Modal(props) {
 
         case 'errorModal':
             return <Error
-                text={modal.text}
+                data={modal.data}
                 show={modal.show}
                 onClose={app.closeModal}
             />

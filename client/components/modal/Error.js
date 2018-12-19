@@ -10,7 +10,8 @@ export default function Error(props) {
         >
             <section>
                 <button className="close" onClick={props.onClose}>X</button>
-                <p>{props.text}</p>
+                <p>{props.data.error}</p>
+                {props.data.call && <p>Error in function: {props.data.call}</p>}
                 <button onClick={props.onClose}>OK< /button>
             </section>
         </Base>

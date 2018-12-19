@@ -26,7 +26,11 @@ function auth(email, password, cookies) {
         });
     })
     .catch(() => {
-        this.openModal('errorModal', 'Email and/or Password are not valid');
+        this.openModal('errorModal', {
+            data: {
+                error: 'Email and/or Password are not valid'
+            }
+        });
     });
 }
 
@@ -50,44 +54,12 @@ function changeScenario() {
         this.closeModal();
     })
     .catch(err => {
-        this.openModal('errorModal', err.message);
-    });
-}
-
-function poll() {
-    axios({
-        method: 'post',
-        url: SCENARIO_ENDPOINT_BASE,
-        headers: {
-            'AuthorizationToken': this.props.authToken
-        },
-        data: {
-            Id: null,
-            Name: "",
-            Description: "",
-            LOB: "",
-            MonthEnd: "2018-03-01"
-        },
-        timeout: 5000
-    })
-    .then(res => {
-        this.setState({
-            selectedScenario: Object.assign({}, res.data),
-            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
-            actionableRows: [],
-            selectedRetrievalRow: res.data.Id // Set this so scenario will be highlighted in `RetrieveScenario` modal.
+        this.openModal('errorModal', {
+            data: {
+                error: err.message,
+                call: 'changeScenario'
+            }
         });
-
-        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        getAllScenarios();
-    })
-    .catch(err => {
-        this.openModal('errorModal', err.message);
-        /*
-        if (err.code === 'ECONNABORTED') {
-            poll.call(this);
-        }
-        */
     });
 }
 
@@ -108,7 +80,6 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
 //        timeout: 3000
     })
     .then(res => {
-//        poll.call(this, res.data.Id);
         this.setState({
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
@@ -120,41 +91,12 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
         getAllScenarios.call(this);
     })
     .catch(err => {
-//        if (err.code === 'ECONNABORTED') {
-//            poll.call(this);
-//        }
-        this.openModal('errorModal', err.message);
-    });
-}
-
-function getLOBS() {
-    axios({
-        method: 'get',
-        url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
-        headers: {
-            'AuthorizationToken': this.props.authToken
-        }
-    }).then(res => {
-        this.setState({
-            LOBS: res.data
+        this.openModal('errorModal', {
+            data: {
+                error: e,
+                call: 'createScenario'
+            }
         });
-
-        this.closeModal();
-    })
-    .catch(err => {
-        let e = err.message;
-
-        // 401 Unauthorized
-        if (err.response.status === 401) {
-            this.props.cookies.remove('authToken');
-            e = 'Your session has timed out, please login again';
-
-            this.setState({
-                loggedIn: false
-            });
-        }
-
-        this.openModal('errorModal', e);
     });
 }
 
@@ -185,7 +127,48 @@ function getAllScenarios() {
             });
         }
 
-        this.openModal('errorModal', e);
+        this.openModal('errorModal', {
+            data: {
+                error: e,
+                call: 'getAllScenarios'
+            }
+        });
+    });
+}
+
+function getLOBS() {
+    axios({
+        method: 'get',
+        url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
+        headers: {
+            'AuthorizationToken': this.props.authToken
+        }
+    }).then(res => {
+        this.setState({
+            LOBS: res.data
+        });
+
+        this.closeModal();
+    })
+    .catch(err => {
+        let e = err.message;
+
+        // 401 Unauthorized
+        if (err.response.status === 401) {
+            this.props.cookies.remove('authToken');
+            e = 'Your session has timed out, please login again';
+
+            this.setState({
+                loggedIn: false
+            });
+        }
+
+        this.openModal('errorModal', {
+            data: {
+                error: e,
+                call: 'getLOBS'
+            }
+        });
     });
 }
 
@@ -214,7 +197,12 @@ function saveScenario(shouldReset, defaultScenario) {
         this.closeModal();
     })
     .catch(err => {
-        this.openModal('errorModal', err.message);
+        this.openModal('errorModal', {
+            data: {
+                error: err.message,
+                call: 'saveScenario'
+            }
+        });
     });
 }
 
@@ -249,7 +237,12 @@ function updateForecastOptions() {
         this.closeModal();
     })
     .catch(err => {
-        this.openModal('errorModal', err.message);
+        this.openModal('errorModal', {
+            data: {
+                error: err.message,
+                call: 'updateForecastOptions'
+            }
+        });
     });
 }
 
@@ -273,7 +266,12 @@ async function updateScenario() {
         this.closeModal();
     })
     .catch(err => {
-        this.openModal('errorModal', err.message);
+        this.openModal('errorModal', {
+            data: {
+                error: err.message,
+                call: 'updateScenario'
+            }
+        });
     });
 }
 
