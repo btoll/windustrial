@@ -71,7 +71,7 @@ export default function ForecastOptions(props) {
                                 }}
                                 type="number"
                                 step="0.01"
-                                value={toFixed(forecastOption.OveridePercentage)}
+                                value={forecastOption.OveridePercentage*100}
                                 onChange={props.onSelectGrowth}
                             />
                              - enter a preferred percentage
