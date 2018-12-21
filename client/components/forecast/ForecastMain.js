@@ -98,6 +98,7 @@ export default class ForecastMain extends React.Component {
             },
             percentages: [],
             scenarios: [],
+            companyName: '',
             LOBS: [],
             selectedScenario: {},
             selectedRetrievalRow: '',
@@ -582,7 +583,7 @@ export default class ForecastMain extends React.Component {
                 />
 
                 <section id="groups">
-                    <h1>{this.state.selectedScenario.CompanyName || "Company Name"}</h1>
+                    <h1>{this.state.companyName || "Company Name"}</h1>
                     <div style={this.styles.headerRow} className="header row">
                         <div className="col1"></div>
                         <div className="col2">Past</div>

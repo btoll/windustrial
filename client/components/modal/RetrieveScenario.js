@@ -1,6 +1,9 @@
 import React from 'react';
 import Base from './Base';
 
+const formatDate = s =>
+    s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1.slice(-2)}`);
+
 export default function RetrieveScenario(props) {
     return (
         <Base
@@ -33,7 +36,7 @@ export default function RetrieveScenario(props) {
                                 >
                                     <td>{scenario.Name}</td>
                                     <td>{scenario.LOB}</td>
-                                    <td>{scenario.MonthEndDate}</td>
+                                    <td>{formatDate(scenario.CreationDate)}</td>
                                 </tr>
                             ))
                         }

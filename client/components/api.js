@@ -145,7 +145,8 @@ function getLOBS() {
         }
     }).then(res => {
         this.setState({
-            LOBS: res.data
+            companyName: res.data.CompanyName,
+            LOBS: res.data.LOBS
         });
 
         this.closeModal();
