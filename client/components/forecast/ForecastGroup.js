@@ -23,7 +23,11 @@ const getCol6 = (props, row) => {
 
     return attachEvent ?
         <div className="col6 highlight">
-            <a href="#" onClick={prepareData.bind(null, props.onOpenModal, Object.assign({}, { data: row}))}>
+            <a href="#" onClick={prepareData.bind(null, props.onOpenModal, Object.assign({}, {
+                data: {
+                    row
+                }
+            }))}>
                 <Percent value={row.ForecastPercentChange + ''} />
             </a>
         </div> :

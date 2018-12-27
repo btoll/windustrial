@@ -111,8 +111,6 @@ function getAllScenarios() {
         this.setState({
             scenarios: res.data
         });
-
-        this.closeModal();
     })
     .catch(err => {
         let e = err.message;
@@ -173,29 +171,27 @@ function getLOBS() {
     });
 }
 
-function saveScenario(shouldReset, defaultScenario) {
-    axios({
+async function saveScenario() {
+    await axios({
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
             'AuthorizationToken': this.props.authToken
         },
-        data: Object.assign({}, this.state.selectedScenario)
+        data: Object.assign({}, this.state.selectedScenario, {
+            StatusType: 'Active'
+        })
     })
     .then(res => {
-        let state = {
+        this.setState({
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Let's always clear the "save" flags when saving!
             hardSave: false,
             softSave: false
-        }
+        });
 
-        if (shouldReset) {
-            state = Object.assign({}, state, defaultScenario);
-        }
-
-        this.setState(state);
-        this.closeModal();
+        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
+        getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -208,7 +204,7 @@ function saveScenario(shouldReset, defaultScenario) {
 }
 
 function updateForecastOptions() {
-    const selectedForecastOption = this.state.modal.data.ScenarioForecastOptions.concat()[0];
+    const selectedForecastOption = this.state.modal.data.row.ScenarioForecastOptions.concat()[0];
     const scenarioForecasts = this.state.selectedScenario.ScenarioForecasts.map(scenarioForecast => {
         const arr = scenarioForecast.ScenarioForecastOptions;
 
@@ -232,7 +228,9 @@ function updateForecastOptions() {
     .then(res => {
         this.setState({
             hardSave: true,
-            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts)
+            forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
+            // Treat the WIP as a new scenario.
+            selectedScenario: res.data
         });
 
         this.closeModal();
@@ -254,7 +252,10 @@ async function updateScenario() {
         headers: {
             'AuthorizationToken': this.props.authToken
         },
-        data: Object.assign({}, this.state.selectedScenario)
+        data: Object.assign({}, this.state.selectedScenario, {
+            ScenarioForecasts: [], // Not passing any `ScenarioForecasts` tells the server not to create a new record.
+            StatusType: 'Active'
+        })
     })
     .then(res => {
         this.setState({

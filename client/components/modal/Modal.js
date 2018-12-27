@@ -34,8 +34,8 @@ export default function Modal(props) {
         case 'forecastOptions':
             return <ForecastOptions
                 show={modal.show}
-                row={modal.data}
-                onSelectGrowth={app.selectGrowth}
+                data={modal.data}
+                onSelectForecastOption={app.selectForecastOption}
                 onClose={app.closeModal}
                 onNavigate={app.navigateForecastOptions}
                 onSubmit={app.updateForecastOptions}

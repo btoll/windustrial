@@ -77,7 +77,6 @@ export default class ForecastMain extends React.Component {
         this.state = {
             loggedIn: true,
 
-            dirty: false,
             expanded: {
                 'Gross Revenue': false,
                 'Non-Operating': false,
@@ -150,7 +149,7 @@ export default class ForecastMain extends React.Component {
         this.updateForecastOptions = this.updateForecastOptions.bind(this);
 
         this.navSelection = this.navSelection.bind(this);
-        this.selectGrowth = this.selectGrowth.bind(this);
+        this.selectForecastOption = this.selectForecastOption.bind(this);
         this.showDate = this.showDate.bind(this);
         this.showNotes = this.showNotes.bind(this);
 
@@ -403,7 +402,11 @@ export default class ForecastMain extends React.Component {
             if (row) {
                 this.setState({
                     actionableRows: a, // It doesn't hurt to set this again, even if it was previously set by a ForecastOptions nav action.
-                    modal: Object.assign({}, this.state.modal, { data: row }),
+                    modal: Object.assign({}, this.state.modal, {
+                        data: {
+                            row
+                        }
+                    }),
                     expanded: Object.assign({}, this.state.expanded, { [row.GroupName]: true }) // Automatically expand groups as user
                                                                                                 // navigages through them.
                 });
@@ -444,8 +447,7 @@ export default class ForecastMain extends React.Component {
                     this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
                     if (this.state.hardSave) {
-                        // TODO: This should be api.saveScenario when Steve gets his code in place!
-                        await api.updateScenario.call(this);
+                        await api.saveScenario.call(this);
                     } else {
                         await api.updateScenario.call(this);
                     }
@@ -474,21 +476,27 @@ export default class ForecastMain extends React.Component {
         }
     }
 
-    selectGrowth(e) {
+    selectForecastOption(e) {
         const target = e.currentTarget;
         const isCustom = target.type === 'number';
+        const statefulRow = this.state.modal.data.row;
 
         // If the input is type="radio", then we need to mixin the `growthPermutation`.
-        const selectedForecastOption = Object.assign({}, this.state.modal.data.ScenarioForecastOptions.concat()[0], !isCustom ? growthPermutations[target.value] : {});
+        const selectedForecastOption = Object.assign({}, statefulRow.ScenarioForecastOptions.concat()[0], !isCustom ? growthPermutations[target.value] : {});
 
         if (isCustom) {
             selectedForecastOption.OveridePercentage = target.value / 100;
         }
 
-        const row = Object.assign({}, this.state.modal.data, { ScenarioForecastOptions: [selectedForecastOption] });
+        const row = Object.assign({}, statefulRow, { ScenarioForecastOptions: [selectedForecastOption] });
 
         this.setState({
-            modal: Object.assign({}, this.state.modal, { data: row })
+            modal: Object.assign({}, this.state.modal, {
+                data: {
+                    row,
+                    dirty: true
+                }
+            })
         });
     }
 
@@ -530,10 +538,14 @@ export default class ForecastMain extends React.Component {
     updateForecastOptions(e) {
         e.preventDefault();
 
-        // TODO: Should be better way to toggle spinner contents!
-        this.closeModal();
-        this.openModal('spinnerModal');
-        api.updateForecastOptions.call(this);
+        if (e.currentTarget.querySelector('input[type=submit').value === 'Exit') {
+            this.closeModal();
+        } else {
+            // TODO: Should be better way to toggle spinner contents!
+            this.closeModal();
+            this.openModal('spinnerModal');
+            api.updateForecastOptions.call(this);
+        }
     }
 
     async updateScenario(e) {
@@ -542,8 +554,7 @@ export default class ForecastMain extends React.Component {
         if (this.state.hardSave) {
             this.state.action.yes = () => {
                 this.openModal('spinnerModal', 'Please wait while we save your scenario');
-                // TODO: This needs to be a POST!!
-                api.updateScenario.call(this, false, defaultScenario);
+                api.saveScenario.call(this);
             };
 
             this.state.action.no = this.closeModal.bind(this);

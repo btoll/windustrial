@@ -5,7 +5,7 @@ const toFixed = f =>
     Number.parseFloat(f * 100).toFixed(2)
 
 export default function ForecastOptions(props) {
-    const forecastOption = props.row.ScenarioForecastOptions.concat()[0];
+    const forecastOption = props.data.row.ScenarioForecastOptions.concat()[0];
 
     return (
         <Base
@@ -14,7 +14,7 @@ export default function ForecastOptions(props) {
             show={props.show}
         >
             <section id="forecastOptions">
-                <h1>{props.row.LineItem}</h1>
+                <h1>{props.data.row.LineItem}</h1>
 
                 <button className="close" onClick={props.onClose}>X</button>
                 <p>
@@ -29,7 +29,7 @@ export default function ForecastOptions(props) {
                             name="forecastOption"
                             value="LongTermTrendOn"
                             checked={forecastOption.LongTermTrendOn}
-                            onChange={props.onSelectGrowth}
+                            onChange={props.onSelectForecastOption}
                         />
                         <label>{toFixed(forecastOption.LongTermTrendPercentage)}% - current long-term growth rate (past 24 mo)</label>
                     </div>
@@ -39,7 +39,7 @@ export default function ForecastOptions(props) {
                             name="forecastOption"
                             value="ShortTermTrendOn"
                             checked={forecastOption.ShortTermTrendOn}
-                            onChange={props.onSelectGrowth}
+                            onChange={props.onSelectForecastOption}
                         />
                         <label>{toFixed(forecastOption.ShortTermTrendPercentage)}% - current short-term rate (past 6 mo)</label>
                     </div>
@@ -49,7 +49,7 @@ export default function ForecastOptions(props) {
                             name="forecastOption"
                             value="MidRateGrowthOn"
                             checked={forecastOption.MidRateGrowthOn}
-                            onChange={props.onSelectGrowth}
+                            onChange={props.onSelectForecastOption}
                         />
                         <label>{toFixed(forecastOption.MidRateGrowthPercentage)}% - mid-point between short and long-time growth</label>
                     </div>
@@ -58,7 +58,7 @@ export default function ForecastOptions(props) {
                             type="radio" name="forecastOption"
                             value="OverideOn"
                             checked={forecastOption.OverideOn}
-                            onChange={props.onSelectGrowth}
+                            onChange={props.onSelectForecastOption}
                         />
                         <label>
                             <input
@@ -72,7 +72,7 @@ export default function ForecastOptions(props) {
                                 type="number"
                                 step="0.01"
                                 value={forecastOption.OveridePercentage*100}
-                                onChange={props.onSelectGrowth}
+                                onChange={props.onSelectForecastOption}
                             />
                              - enter a preferred percentage
                         </label>
@@ -88,12 +88,12 @@ export default function ForecastOptions(props) {
                     <div>
                         <input
                             type="submit"
-                            value="Go"
+                            value={!props.data.dirty ? "Exit" : "Apply"}
                             className="green-large"
                         />
                     </div>
                     <div className="optionsNav">
-                        <div onClick={props.onNavigate.bind(null, props.row)}>
+                        <div onClick={props.onNavigate.bind(null, props.data.row)}>
                             <a href="#">previous</a>
                             <a href="#">next</a>
                         </div>
