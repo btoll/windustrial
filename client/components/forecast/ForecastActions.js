@@ -61,7 +61,7 @@ export default class ForecastActions extends React.Component {
                         <textarea
                             name="Notes"
                             disabled={!isSelected}
-                            value={this.props.selectedScenario.Notes}
+                            value={this.props.selectedScenario.Notes ? this.props.selectedScenario.Notes : ''}
                             onChange={this.props.onChangeText}
                         ></textarea>
                     </div>

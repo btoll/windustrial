@@ -34,8 +34,8 @@ function auth(email, password, cookies) {
     });
 }
 
-function changeScenario() {
-    axios({
+async function changeScenario() {
+    await axios({
         method: 'get',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedRetrievalRow}`,
         headers: {
@@ -50,8 +50,6 @@ function changeScenario() {
             forecastGroups: this.getForecastGroups(data.ScenarioForecasts),
             actionableRows: []
         });
-
-        this.closeModal();
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -63,8 +61,8 @@ function changeScenario() {
     });
 }
 
-function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter) {
-    axios({
+async function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter) {
+    await axios({
         method: 'post',
         url: SCENARIO_ENDPOINT_BASE,
         headers: {
@@ -76,10 +74,9 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
             Description: scenarioDescription,
             LOB,
             MonthEnd: scenarioMonthEnd
-        },
-//        timeout: 3000
+        }
     })
-    .then(res => {
+    .then(async res => {
         this.setState({
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
@@ -88,7 +85,7 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
         });
 
         // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        getAllScenarios.call(this);
+        await getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -100,8 +97,8 @@ function createScenario(scenarioName, scenarioDescription, scenarioMonthEnd, LOB
     });
 }
 
-function getAllScenarios() {
-    axios({
+async function getAllScenarios() {
+    await axios({
         method: 'get',
         url: SCENARIO_ENDPOINT_BASE,
         headers: {
@@ -134,8 +131,8 @@ function getAllScenarios() {
     });
 }
 
-function getLOBS() {
-    axios({
+async function getLOBS() {
+    await axios({
         method: 'get',
         url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
         headers: {
@@ -146,8 +143,6 @@ function getLOBS() {
             companyName: res.data.CompanyName,
             LOBS: res.data.LOBS
         });
-
-        this.closeModal();
     })
     .catch(err => {
         let e = err.message;
@@ -182,7 +177,7 @@ async function saveScenario() {
             StatusType: 'Active'
         })
     })
-    .then(res => {
+    .then(async res => {
         this.setState({
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Let's always clear the "save" flags when saving!
@@ -191,7 +186,7 @@ async function saveScenario() {
         });
 
         // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        getAllScenarios.call(this);
+        await getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -203,7 +198,7 @@ async function saveScenario() {
     });
 }
 
-function updateForecastOptions() {
+async function updateForecastOptions() {
     const selectedForecastOption = this.state.modal.data.row.ScenarioForecastOptions.concat()[0];
     const scenarioForecasts = this.state.selectedScenario.ScenarioForecasts.map(scenarioForecast => {
         const arr = scenarioForecast.ScenarioForecastOptions;
@@ -215,7 +210,7 @@ function updateForecastOptions() {
         return scenarioForecast;
     });
 
-    axios({
+    await axios({
         method: 'put',
         url: `${SCENARIO_ENDPOINT_BASE}/${this.state.selectedScenario.Id}`,
         headers: {
@@ -232,8 +227,6 @@ function updateForecastOptions() {
             // Treat the WIP as a new scenario.
             selectedScenario: res.data
         });
-
-        this.closeModal();
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -264,8 +257,6 @@ async function updateScenario() {
             hardSave: false,
             softSave: false
         })
-
-        this.closeModal();
     })
     .catch(err => {
         this.openModal('errorModal', {

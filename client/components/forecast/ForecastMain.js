@@ -213,11 +213,12 @@ export default class ForecastMain extends React.Component {
         });
     }
 
-    changeScenario(e) {
+    async changeScenario(e) {
         // TODO: Should be better way to toggle spinner contents!
         this.closeModal();
         this.openModal('spinnerModal');
-        api.changeScenario.call(this);
+        await api.changeScenario.call(this);
+        this.closeModal();
     }
 
     confirm(confirm, e) {
@@ -234,7 +235,7 @@ export default class ForecastMain extends React.Component {
         }
     }
 
-    createScenario(formData) {
+    async createScenario(formData) {
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
         const LOB = formData.get('LOB');
@@ -263,7 +264,8 @@ export default class ForecastMain extends React.Component {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
             this.openModal('spinnerModal');
-            api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter);
+            await api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter);
+            this.closeModal();
         }
     }
 
@@ -331,6 +333,8 @@ export default class ForecastMain extends React.Component {
                     } else {
                         await api.updateScenario.call(this);
                     }
+
+                    this.closeModal();
 
                     cb();
                 }
@@ -452,6 +456,8 @@ export default class ForecastMain extends React.Component {
                         await api.updateScenario.call(this);
                     }
 
+                    this.closeModal();
+
                     cb();
                 }
             };
@@ -535,7 +541,7 @@ export default class ForecastMain extends React.Component {
         );
     }
 
-    updateForecastOptions(e) {
+    async updateForecastOptions(e) {
         e.preventDefault();
 
         if (e.currentTarget.querySelector('input[type=submit').value === 'Exit') {
@@ -544,7 +550,8 @@ export default class ForecastMain extends React.Component {
             // TODO: Should be better way to toggle spinner contents!
             this.closeModal();
             this.openModal('spinnerModal');
-            api.updateForecastOptions.call(this);
+            await api.updateForecastOptions.call(this);
+            this.closeModal();
         }
     }
 
@@ -552,9 +559,10 @@ export default class ForecastMain extends React.Component {
         e.preventDefault();
 
         if (this.state.hardSave) {
-            this.state.action.yes = () => {
+            this.state.action.yes = async () => {
                 this.openModal('spinnerModal', 'Please wait while we save your scenario');
-                api.saveScenario.call(this);
+                await api.saveScenario.call(this);
+                this.closeModal();
             };
 
             this.state.action.no = this.closeModal.bind(this);
@@ -563,8 +571,8 @@ export default class ForecastMain extends React.Component {
         } else {
             this.closeModal();
             this.openModal('spinnerModal', 'Please wait while we save your scenario...');
-
             await api.updateScenario.call(this);
+            this.closeModal();
         }
     }
 
@@ -629,10 +637,11 @@ export default class ForecastMain extends React.Component {
             <Login authToken={this.props.authToken} />
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.openModal('spinnerModal');
-        api.getAllScenarios.call(this);
-        api.getLOBS.call(this);
+        await api.getAllScenarios.call(this);
+        await api.getLOBS.call(this);
+        this.closeModal();
     }
 }
 
