@@ -99,6 +99,7 @@ export default class ForecastMain extends React.Component {
             scenarios: [],
             companyName: '',
             LOBS: [],
+            reportDates: [],
             selectedScenario: {},
             selectedRetrievalRow: '',
 
@@ -215,8 +216,6 @@ export default class ForecastMain extends React.Component {
     }
 
     async changeScenario(e) {
-        // TODO: Should be better way to toggle spinner contents!
-        this.closeModal();
         this.openModal('spinnerModal');
         await api.changeScenario.call(this);
         this.closeModal();
@@ -240,32 +239,21 @@ export default class ForecastMain extends React.Component {
         const scenarioName = formData.get('scenarioName');
         const scenarioDescription = formData.get('scenarioDescription');
         const LOB = formData.get('LOB');
-        const revenueCenter = formData.get('revenueCenter');
-        const scenarioMonthEnd =
-            // Format MM/DD/YY to YYYYMMDD.
-            formData.get('scenarioMonthEnd')
-            .replace(/^(\d{2})\/(\d{2})\/(\d{2})$/, (matched, month, day, year) => (
-                `20${year}-${month}-${day}`
-            ));
-        // TODO: Error checking for `scenarioMonthEnd` date!
 
-        if (!scenarioName || !scenarioDescription || !scenarioMonthEnd || !LOB) {
+        if (!scenarioName || !scenarioDescription || !LOB) {
             this.openModal('messageModal', {
                 data: {
                     message: 'The following cannot be blank:',
                     fields: [
                         'Scenario Name',
                         'Scenario Description',
-                        'Scenario End Date',
                         'LOB'
                     ]
                 }
             });
         } else {
-            // TODO: Should be better way to toggle spinner contents!
-            this.closeModal();
-            this.openModal('spinnerModal');
-            await api.createScenario.call(this, scenarioName, scenarioDescription, scenarioMonthEnd, LOB, revenueCenter);
+            this.openModal('spinnerModal', 'Please wait while we create your scenario...');
+            await api.createScenario.call(this, scenarioName, scenarioDescription, formData.get('scenarioMonthEnd'), LOB, formData.get('revenueCenter'));
             this.closeModal();
         }
     }
@@ -274,7 +262,7 @@ export default class ForecastMain extends React.Component {
         this.setState({
             action: {
                 yes: async () => {
-                    this.openModal('spinnerModal', 'Please wait while we delete your scenario');
+                    this.openModal('spinnerModal', 'Please wait while we delete your scenario...');
                     await api.deleteScenario.call(this, scenarioID);
                     this.closeModal();
                 }
@@ -345,7 +333,6 @@ export default class ForecastMain extends React.Component {
                 action: {
                     no: cb,
                     yes: async () => {
-                        this.closeModal();
                         this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
                         if (this.state.hardSave) {
@@ -474,7 +461,6 @@ export default class ForecastMain extends React.Component {
                 action: {
                     no: cb,
                     yes: async () => {
-                        this.closeModal();
                         this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
                         if (this.state.hardSave) {
@@ -589,8 +575,6 @@ export default class ForecastMain extends React.Component {
         if (e.currentTarget.querySelector('input[type=submit').value === 'Exit') {
             this.closeModal();
         } else {
-            // TODO: Should be better way to toggle spinner contents!
-            this.closeModal();
             this.openModal('spinnerModal');
             await api.updateForecastOptions.call(this);
             this.closeModal();
@@ -619,7 +603,6 @@ export default class ForecastMain extends React.Component {
                 }
             });
         } else {
-            this.closeModal();
             this.openModal('spinnerModal', 'Please wait while we save your scenario...');
             await api.updateScenario.call(this);
             this.closeModal();
@@ -637,6 +620,7 @@ export default class ForecastMain extends React.Component {
                     modal={this.state.modal}
                     scenarios={this.state.scenarios}
                     LOBS={this.state.LOBS}
+                    reportDates={this.state.reportDates}
                     selectedScenario={this.state.selectedScenario}
                     onChangeText={this.changeText}
                     onMaybeCreateScenario={this.maybeCreateScenario}
@@ -701,6 +685,7 @@ export default class ForecastMain extends React.Component {
         this.openModal('spinnerModal');
         await api.getAllScenarios.call(this);
         await api.getLOBS.call(this);
+        await api.getReportDates.call(this);
         this.closeModal();
     }
 }

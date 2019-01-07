@@ -196,6 +196,40 @@ async function getLOBS() {
     });
 }
 
+async function getReportDates() {
+    await axios({
+        method: 'get',
+        url: `${SCENARIO_ENDPOINT_BASE}/ReportDates`,
+        headers: {
+            'AuthorizationToken': this.props.authToken
+        }
+    }).then(res => {
+        this.setState({
+            reportDates: res.data
+        });
+    })
+    .catch(err => {
+        let e = err.message;
+
+        // 401 Unauthorized
+        if (err.response.status === 401) {
+            this.props.cookies.remove('authToken');
+            e = 'Your session has timed out, please login again';
+
+            this.setState({
+                loggedIn: false
+            });
+        }
+
+        this.openModal('errorModal', {
+            data: {
+                error: e,
+                call: 'getReportDates'
+            }
+        });
+    });
+}
+
 async function saveScenario() {
     await axios({
         method: 'put',
@@ -306,6 +340,7 @@ export {
     deleteScenario,
     getAllScenarios,
     getLOBS,
+    getReportDates,
     saveScenario,
     updateForecastOptions,
     updateScenario

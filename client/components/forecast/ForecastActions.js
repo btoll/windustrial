@@ -100,10 +100,14 @@ export default class ForecastActions extends React.Component {
                         />
                     </div>
                     <div>
-                        <input
-                            placeholder="<scenario end date - mm/dd/yy>"
-                            name="scenarioMonthEnd"
-                        />
+                        <select name="scenarioMonthEnd">
+                            <option value="">Select Scenario End Date</option>
+                            {
+                                this.props.reportDates.map((name, i) => (
+                                    <option key={i} value={name}>{name}</option>
+                                ))
+                            }
+                        </select>
                     </div>
                     <div>
                         <select name="LOB">
