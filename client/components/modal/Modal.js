@@ -17,9 +17,8 @@ export default function Modal(props) {
     switch (modal.type) {
         case 'confirmModal':
             return <Confirm
+                data={modal.data}
                 show={modal.show}
-                softSave={state.softSave}
-                hardSave={state.hardSave}
                 onClick={app.confirm}
                 onClose={app.closeModal}
             />

@@ -138,6 +138,7 @@ export default class ForecastMain extends React.Component {
 
         this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
+        this.deleteScenario = this.deleteScenario.bind(this);
         this.maybeCreateScenario = this.maybeCreateScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
         this.retrieveScenario = this.retrieveScenario.bind(this);
@@ -269,6 +270,24 @@ export default class ForecastMain extends React.Component {
         }
     }
 
+    deleteScenario(scenarioID) {
+        this.setState({
+            action: {
+                yes: async () => {
+                    this.openModal('spinnerModal', 'Please wait while we delete your scenario');
+                    await api.deleteScenario.call(this, scenarioID);
+                    this.closeModal();
+                }
+            }
+        });
+
+        this.openModal('confirmModal', {
+            data: {
+                confirmType: 'delete'
+            }
+        });
+    }
+
     getForecastGroups(data) {
         return {
             'COGS': {
@@ -322,25 +341,32 @@ export default class ForecastMain extends React.Component {
         if (this.state.softSave || this.state.hardSave) {
             // TODO: Maybe put this elsewhere so it's not created every time this function is called.
             const cb = this.createScenario.bind(this, formData);
-            this.state.action = {
-                no: cb,
-                yes: async () => {
-                    this.closeModal();
-                    this.openModal('spinnerModal', 'Please wait while we save your scenario');
+            this.setState({
+                action: {
+                    no: cb,
+                    yes: async () => {
+                        this.closeModal();
+                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
-                    if (this.state.hardSave) {
-                        await api.createScenario.call(this);
-                    } else {
-                        await api.updateScenario.call(this);
+                        if (this.state.hardSave) {
+                            await api.createScenario.call(this);
+                        } else {
+                            await api.updateScenario.call(this);
+                        }
+
+                        this.closeModal();
+                        cb();
                     }
-
-                    this.closeModal();
-
-                    cb();
                 }
-            };
+            });
 
-            this.openModal('confirmModal');
+            this.openModal('confirmModal', {
+                data: {
+                    confirmType: 'save',
+                    hardSave: this.state.hardSave,
+                    softSave: this.state.softSave
+                }
+            });
         } else {
             this.createScenario(formData);
         }
@@ -444,25 +470,32 @@ export default class ForecastMain extends React.Component {
         if (this.state.softSave || this.state.hardSave) {
             // TODO: Maybe put this elsewhere so it's not created every time this function is called.
             const cb = this.openModal.bind(this, 'retrieveScenarioModal');
-            this.state.action = {
-                no: cb,
-                yes: async () => {
-                    this.closeModal();
-                    this.openModal('spinnerModal', 'Please wait while we save your scenario');
+            this.setState({
+                action: {
+                    no: cb,
+                    yes: async () => {
+                        this.closeModal();
+                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
 
-                    if (this.state.hardSave) {
-                        await api.saveScenario.call(this);
-                    } else {
-                        await api.updateScenario.call(this);
+                        if (this.state.hardSave) {
+                            await api.saveScenario.call(this);
+                        } else {
+                            await api.updateScenario.call(this);
+                        }
+
+                        this.closeModal();
+                        cb();
                     }
-
-                    this.closeModal();
-
-                    cb();
                 }
-            };
+            });
 
-            this.openModal('confirmModal');
+            this.openModal('confirmModal', {
+                data: {
+                    confirmType: 'save',
+                    hardSave: this.state.hardSave,
+                    softSave: this.state.softSave
+                }
+            });
         } else {
             this.openModal('retrieveScenarioModal');
         }
@@ -470,12 +503,21 @@ export default class ForecastMain extends React.Component {
 
     saveScenario(shouldReset) {
         if (this.state.hardSave) {
-            this.state.action.yes = () => {
-                this.openModal('spinnerModal', 'Please wait while we save your scenario');
-                api.saveScenario.call(this, shouldReset, defaultScenario);
-            };
+            this.setState({
+                action: {
+                    yes: () => {
+                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        api.saveScenario.call(this, shouldReset, defaultScenario);
+                    }
+                }
+            });
 
-            this.openModal('confirmModal');
+            this.openModal('confirmModal', {
+                data: {
+                    confirmType: 'save',
+                    hardSave: this.state.hardSave
+                }
+            });
         } else {
             this.openModal('spinnerModal', 'Please wait while we save your scenario');
             api.saveScenario.call(this, shouldReset, defaultScenario);
@@ -559,15 +601,23 @@ export default class ForecastMain extends React.Component {
         e.preventDefault();
 
         if (this.state.hardSave) {
-            this.state.action.yes = async () => {
-                this.openModal('spinnerModal', 'Please wait while we save your scenario');
-                await api.saveScenario.call(this);
-                this.closeModal();
-            };
+            this.setState({
+                action: {
+                    yes: async () => {
+                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        await api.saveScenario.call(this);
+                        this.closeModal();
+                    },
+                    no: this.closeModal.bind(this)
+                }
+            });
 
-            this.state.action.no = this.closeModal.bind(this);
-
-            this.openModal('confirmModal');
+            this.openModal('confirmModal', {
+                data: {
+                    confirmType: 'save',
+                    hardSave: this.state.hardSave
+                }
+            });
         } else {
             this.closeModal();
             this.openModal('spinnerModal', 'Please wait while we save your scenario...');
@@ -630,6 +680,16 @@ export default class ForecastMain extends React.Component {
                     {
                         this.state.modal.show &&
                             <Modal app={this} />
+                    }
+
+                    {
+                        !!this.state.selectedScenario.Id &&
+                            <button
+                                className="green-large"
+                                onClick={this.deleteScenario.bind(this, this.state.selectedScenario.Id)}
+                            >
+                                Delete Scenario
+                            </button>
                     }
                 </section>
             </>

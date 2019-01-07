@@ -97,6 +97,36 @@ async function createScenario(scenarioName, scenarioDescription, scenarioMonthEn
     });
 }
 
+async function deleteScenario(scenarioID) {
+    await axios({
+        method: 'delete',
+        url: `${SCENARIO_ENDPOINT_BASE}/${scenarioID}`,
+        headers: {
+            'AuthorizationToken': this.props.authToken
+        }
+    })
+    .then(async res => {
+        this.setState({
+            selectedScenario: {
+                Id: null
+            },
+            actionableRows: [],
+            selectedRetrievalRow: '' // So nothing is highlighted in the modal grid when Retrieve a Scenario is clicked.
+        });
+
+        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
+        await getAllScenarios.call(this);
+    })
+    .catch(err => {
+        this.openModal('errorModal', {
+            data: {
+                error: e,
+                call: 'deleteScenario'
+            }
+        });
+    });
+}
+
 async function getAllScenarios() {
     await axios({
         method: 'get',
@@ -273,6 +303,7 @@ export {
     auth,
     changeScenario,
     createScenario,
+    deleteScenario,
     getAllScenarios,
     getLOBS,
     saveScenario,
