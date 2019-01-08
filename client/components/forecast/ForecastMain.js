@@ -9,6 +9,15 @@ import Login from '../Login';
 import Modal from '../modal/Modal';
 import * as api from '../api';
 
+// TODO:
+// https://github.com/axios/axios#cancellation
+//
+// To repro, replace `AuthorizationToken` string in getLOBS with an empty string.
+//bft.js:16923 Warning: Can't call setState (or forceUpdate) on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in the componentWillUnmount method.
+//        in ForecastMain (created by Login)
+//    in Login (created by App)
+//    in App
+
 const formatDate = s =>
     s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1.slice(-2)}`);
 
@@ -264,7 +273,7 @@ export default class ForecastMain extends React.Component {
                 yes: async () => {
                     this.openModal('spinnerModal', 'Please wait while we delete your scenario...');
                     await api.deleteScenario.call(this, scenarioID);
-                    this.closeModal();
+//                    this.closeModal();
                 }
             }
         });
@@ -683,9 +692,7 @@ export default class ForecastMain extends React.Component {
 
     async componentDidMount() {
         this.openModal('spinnerModal');
-        await api.getAllScenarios.call(this);
-        await api.getLOBS.call(this);
-        await api.getReportDates.call(this);
+        await api.init.call(this);
         this.closeModal();
     }
 }

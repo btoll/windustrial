@@ -78,14 +78,12 @@ async function createScenario(scenarioName, scenarioDescription, scenarioMonthEn
     })
     .then(async res => {
         this.setState({
+            scenarios: await getAllScenarios.call(this),
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             actionableRows: [],
             selectedRetrievalRow: res.data.Id // Set this so scenario will be highlighted in `RetrieveScenario` modal.
         });
-
-        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        await getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -107,20 +105,18 @@ async function deleteScenario(scenarioID) {
     })
     .then(async res => {
         this.setState({
+            scenarios: await getAllScenarios.call(this),
             selectedScenario: {
                 Id: null
             },
             actionableRows: [],
             selectedRetrievalRow: '' // So nothing is highlighted in the modal grid when Retrieve a Scenario is clicked.
         });
-
-        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        await getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
             data: {
-                error: e,
+                error: err.message,
                 call: 'deleteScenario'
             }
         });
@@ -128,103 +124,86 @@ async function deleteScenario(scenarioID) {
 }
 
 async function getAllScenarios() {
-    await axios({
+    return await axios({
         method: 'get',
         url: SCENARIO_ENDPOINT_BASE,
         headers: {
             'AuthorizationToken': this.props.authToken
         }
     }).then(res => {
-        this.setState({
-            scenarios: res.data
-        });
+        return res.data;
     })
     .catch(err => {
-        let e = err.message;
-
-        // 401 Unauthorized
-        if (err.response.status === 401) {
-            this.props.cookies.remove('authToken');
-            e = 'Your session has timed out, please login again';
-
-            this.setState({
-                loggedIn: false
-            });
-        }
-
-        this.openModal('errorModal', {
-            data: {
-                error: e,
-                call: 'getAllScenarios'
-            }
-        });
+        return err;
     });
 }
 
-async function getLOBS() {
-    await axios({
+function getLOBS() {
+    return axios({
         method: 'get',
         url: `${SCENARIO_ENDPOINT_BASE}/LOBS`,
         headers: {
             'AuthorizationToken': this.props.authToken
         }
     }).then(res => {
-        this.setState({
-            companyName: res.data.CompanyName,
-            LOBS: res.data.LOBS
-        });
+        return res.data;
     })
     .catch(err => {
-        let e = err.message;
-
-        // 401 Unauthorized
-        if (err.response.status === 401) {
-            this.props.cookies.remove('authToken');
-            e = 'Your session has timed out, please login again';
-
-            this.setState({
-                loggedIn: false
-            });
-        }
-
-        this.openModal('errorModal', {
-            data: {
-                error: e,
-                call: 'getLOBS'
-            }
-        });
+        return err;
     });
 }
 
-async function getReportDates() {
-    await axios({
+function getReportDates() {
+    return axios({
         method: 'get',
         url: `${SCENARIO_ENDPOINT_BASE}/ReportDates`,
         headers: {
             'AuthorizationToken': this.props.authToken
         }
     }).then(res => {
-        this.setState({
-            reportDates: res.data
-        });
+        return res.data;
     })
+    .catch(err => {
+        return err;
+    });
+}
+
+async function init() {
+    await axios.all([
+        getAllScenarios.call(this),
+        getLOBS.call(this),
+        getReportDates.call(this)
+    ])
+    .then(axios.spread((scenarios, lobs, reportDates) => {
+        this.setState({
+            companyName: lobs.CompanyName,
+            LOBS: lobs.LOBS,
+            reportDates,
+            scenarios
+        });
+    }))
     .catch(err => {
         let e = err.message;
 
-        // 401 Unauthorized
-        if (err.response.status === 401) {
+        // TODO:
+        // I have a situation where getLOBS is failing when called from `init`, but the whole stack of calls
+        // made by axios.all isn't immediately terminating to the .catch clause of axios.all.  Is this a bug?
+//        if (
+//            err.response && err.response.status === 401 ||
+//            err.message == "Cannot read property 'map' of undefined"
+//        ) {
             this.props.cookies.remove('authToken');
             e = 'Your session has timed out, please login again';
 
             this.setState({
                 loggedIn: false
             });
-        }
+//        }
 
         this.openModal('errorModal', {
             data: {
                 error: e,
-                call: 'getReportDates'
+                call: 'init'
             }
         });
     });
@@ -243,14 +222,12 @@ async function saveScenario() {
     })
     .then(async res => {
         this.setState({
+            scenarios: await getAllScenarios.call(this),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Let's always clear the "save" flags when saving!
             hardSave: false,
             softSave: false
         });
-
-        // TODO: This isn't great, but will do for now (b/c it's making a call to get the entire list again).
-        await getAllScenarios.call(this);
     })
     .catch(err => {
         this.openModal('errorModal', {
@@ -338,9 +315,7 @@ export {
     changeScenario,
     createScenario,
     deleteScenario,
-    getAllScenarios,
-    getLOBS,
-    getReportDates,
+    init,
     saveScenario,
     updateForecastOptions,
     updateScenario
