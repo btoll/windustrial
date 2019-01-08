@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { AUTH, SCENARIO_ENDPOINT_BASE } from './config';
 
+const formatDate = s =>
+    s.replace(/(\d{4})-(\d{2})-(\d{2}).*/g, (matched, _1, _2, _3) => `${_2}/${_3}/${_1}`);
+
 function auth(email, password, cookies) {
     axios({
         method: 'post',
@@ -82,6 +85,7 @@ async function createScenario(scenarioName, scenarioDescription, scenarioMonthEn
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             actionableRows: [],
+            uploadDate: formatDate(res.data.FutureForecastDates.EndDate), // Set the date in ForecastActions nav in New Scenario block (Scenario End Date).
             selectedRetrievalRow: res.data.Id // Set this so scenario will be highlighted in `RetrieveScenario` modal.
         });
     })

@@ -111,6 +111,7 @@ export default class ForecastMain extends React.Component {
             reportDates: [],
             selectedScenario: {},
             selectedRetrievalRow: '',
+            uploadDate: '',
 
             softSave: false, // Will popup a Confirm modal when retrieving another scenario or saving when `true`.
                              // Triggered when Description or Notes is changed (see `changeText` handler).
@@ -124,7 +125,7 @@ export default class ForecastMain extends React.Component {
             actionableRows: [] // This is lazy-loaded and used for navigating when the `ForecastOptions` modal is up.
                                // These are the rows that will trigger the popup (the total rows do not).
                                // See `navigateForecastOptions` function.
-        }
+        };
 
         this.styles = {
             headerRow: {
@@ -138,7 +139,7 @@ export default class ForecastMain extends React.Component {
                 fontSize: '12px',
 
             }
-        }
+        };
 
         this.confirm = this.confirm.bind(this);
 
@@ -148,6 +149,7 @@ export default class ForecastMain extends React.Component {
 
         this.changeScenario = this.changeScenario.bind(this);
         this.changeText = this.changeText.bind(this);
+        this.changeUploadDate = this.changeUploadDate.bind(this);
         this.deleteScenario = this.deleteScenario.bind(this);
         this.maybeCreateScenario = this.maybeCreateScenario.bind(this);
         this.resetScenario = this.resetScenario.bind(this);
@@ -221,6 +223,12 @@ export default class ForecastMain extends React.Component {
                     text: e.currentTarget.value
                 }
             })
+        });
+    }
+
+    changeUploadDate(e) {
+        this.setState({
+            uploadDate: e.currentTarget.value
         });
     }
 
@@ -558,7 +566,7 @@ export default class ForecastMain extends React.Component {
     }
 
     showDate(field) {
-        return `${this.state.selectedScenario[field] && formatDate(this.state.selectedScenario[field]) || "mm/dd/yy"}`;
+        return field && formatDate(field) || 'mm/dd/yy';
     }
 
     showNotes(e) {
@@ -619,6 +627,9 @@ export default class ForecastMain extends React.Component {
     }
 
     render() {
+        const selectedScenario = this.state.selectedScenario;
+        const isSelected = selectedScenario.Id;
+
         return this.props.authToken && this.state.loggedIn ? (
             <>
                 <section id="banner">
@@ -630,10 +641,12 @@ export default class ForecastMain extends React.Component {
                     scenarios={this.state.scenarios}
                     LOBS={this.state.LOBS}
                     reportDates={this.state.reportDates}
-                    selectedScenario={this.state.selectedScenario}
+                    selectedScenario={selectedScenario}
                     onChangeText={this.changeText}
                     onMaybeCreateScenario={this.maybeCreateScenario}
                     onRetrieveScenario={this.retrieveScenario}
+                    uploadDate={this.state.uploadDate}
+                    onChangeUploadDate={this.changeUploadDate}
                     onOpenModal={this.openModal}
                     onUpdateScenario={this.updateScenario}
                     onShowNotes={this.showNotes}
@@ -656,15 +669,15 @@ export default class ForecastMain extends React.Component {
                     </div>
                     <div style={this.styles.subHeaderRow} className="header row">
                         <div className="col1"></div>
-                        <div className="col2">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
-                        <div className="col3">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
+                        <div className="col2">{this.showDate(isSelected && selectedScenario.PriorForecastDates.StartDate)} to<br />{this.showDate(isSelected && selectedScenario.PriorForecastDates.EndDate)}</div>
+                        <div className="col3">{this.showDate(isSelected && selectedScenario.CurrentForecastDates.StartDate)} to<br />{this.showDate(isSelected && selectedScenario.CurrentForecastDates.EndDate)}</div>
                         <div className="col4">Growth<br />Rate</div>
-                        <div className="col5">{this.showDate('CurrentStartDate')} to<br />{this.showDate('CurrentEndDate')}</div>
+                        <div className="col5">{this.showDate(isSelected && selectedScenario.FutureForecastDates.StartDate)} to<br />{this.showDate(isSelected && selectedScenario.FutureForecastDates.EndDate)}</div>
                         <div className="col6">Growth<br />Rate</div>
                     </div>
 
                     {
-                        !!this.state.selectedScenario.Id ?
+                        isSelected ?
                             ['Gross Revenue', 'COGS', 'Sales,General,Admin Expenses', 'Non-Operating']
                             .map(this.renderGroup.bind(this))
                         : <div style={{'display': 'none'}}></div>
@@ -676,10 +689,10 @@ export default class ForecastMain extends React.Component {
                     }
 
                     {
-                        !!this.state.selectedScenario.Id &&
+                        isSelected &&
                             <button
                                 className="green-large"
-                                onClick={this.deleteScenario.bind(this, this.state.selectedScenario.Id)}
+                                onClick={this.deleteScenario.bind(this, selectedScenario.Id)}
                             >
                                 Delete Scenario
                             </button>
