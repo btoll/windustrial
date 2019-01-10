@@ -8,7 +8,7 @@ export default function Base(props) {
             className={props.className}
             closeTimeoutMS={150}
             contentLabel=''
-            isOpen={props.show}
+            isOpen={true}
             onRequestClose={props.onCloseModal} // For closing using ESC key.
             shouldCloseOnEsc={true}
         >

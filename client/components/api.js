@@ -28,10 +28,20 @@ function auth(email, password, cookies) {
             authToken: authToken
         });
     })
-    .catch(() => {
-        this.openModal('errorModal', {
-            data: {
-                error: 'Email and/or Password are not valid'
+    .catch(err => {
+        // It will fail either b/c of a network error, i.e. no connectivity
+        // or an auth failure.
+        const message = err.response ?
+            'Email and/or Password are not valid' :
+            err.message;
+
+        this.setState({
+            modal: {
+                show: true,
+                type: 'error',
+                data: {
+                    error: message
+                }
             }
         });
     });
@@ -49,13 +59,20 @@ async function changeScenario() {
         const data = res.data;
 
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             selectedScenario: Object.assign({}, data),
             forecastGroups: this.getForecastGroups(data.ScenarioForecasts),
             actionableRows: []
         });
     })
     .catch(err => {
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: err.message,
                 call: 'changeScenario'
@@ -81,6 +98,13 @@ async function createScenario(scenarioName, scenarioDescription, scenarioMonthEn
     })
     .then(async res => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             scenarios: await getAllScenarios.call(this),
             selectedScenario: Object.assign({}, res.data),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
@@ -90,7 +114,7 @@ async function createScenario(scenarioName, scenarioDescription, scenarioMonthEn
         });
     })
     .catch(err => {
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: e,
                 call: 'createScenario'
@@ -109,6 +133,13 @@ async function deleteScenario(scenarioID) {
     })
     .then(async res => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             scenarios: await getAllScenarios.call(this),
             selectedScenario: {
                 Id: null
@@ -118,10 +149,14 @@ async function deleteScenario(scenarioID) {
         });
     })
     .catch(err => {
-        this.openModal('errorModal', {
-            data: {
-                error: err.message,
-                call: 'deleteScenario'
+        this.setState({
+            modal: {
+                show: true,
+                type: 'error',
+                data: {
+                    error: err.message,
+                    call: 'deleteScenario'
+                }
             }
         });
     });
@@ -180,6 +215,13 @@ async function init() {
     ])
     .then(axios.spread((scenarios, lobs, reportDates) => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             companyName: lobs.CompanyName,
             LOBS: lobs.LOBS,
             reportDates,
@@ -204,7 +246,7 @@ async function init() {
             });
 //        }
 
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: e,
                 call: 'init'
@@ -226,6 +268,13 @@ async function saveScenario() {
     })
     .then(async res => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             scenarios: await getAllScenarios.call(this),
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Let's always clear the "save" flags when saving!
@@ -234,7 +283,7 @@ async function saveScenario() {
         });
     })
     .catch(err => {
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: err.message,
                 call: 'saveScenario'
@@ -267,6 +316,13 @@ async function updateForecastOptions() {
     })
     .then(res => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             hardSave: true,
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Treat the WIP as a new scenario.
@@ -274,7 +330,7 @@ async function updateForecastOptions() {
         });
     })
     .catch(err => {
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: err.message,
                 call: 'updateForecastOptions'
@@ -297,6 +353,13 @@ async function updateScenario() {
     })
     .then(res => {
         this.setState({
+            actionableRows: [],
+            modal: {
+                data: {},
+                show: false,
+                text: '',
+                type: null
+            },
             forecastGroups: this.getForecastGroups(res.data.ScenarioForecasts),
             // Let's always clear the "save" flags when updating!
             hardSave: false,
@@ -304,7 +367,7 @@ async function updateScenario() {
         })
     })
     .catch(err => {
-        this.openModal('errorModal', {
+        this.openModal('error', {
             data: {
                 error: err.message,
                 call: 'updateScenario'

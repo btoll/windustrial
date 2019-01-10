@@ -21,12 +21,11 @@ export default class Login extends React.Component {
                 show: false,
                 text: '',
                 type: null
-            },
+            }
         };
 
-        this.login = this.login.bind(this);
         this.closeModal = this.closeModal.bind(this);
-        this.openModal = this.openModal.bind(this);
+        this.login = this.login.bind(this);
 
         // For aria, should hide underyling dom elements when modal is shown.
         // (Doesn't appear to be working.)
@@ -42,33 +41,18 @@ export default class Login extends React.Component {
         });
     }
 
-    openModal(type, modalData, e) {
-        if (e) {
-            e.preventDefault();
-        // Duck typing!
-        } else if (modalData && modalData.preventDefault) {
-            modalData.preventDefault();
-        }
-
-        const [data, text] = (typeof modalData !== 'object') ?
-            [null, modalData] :
-            [modalData.data, modalData.text];
-
-        this.setState({
-            modal: {
-                data,
-                show: true,
-                text,
-                type
-            }
-        });
-    }
-
     login(e) {
         e.preventDefault();
 
         const formData = new FormData(e.target);
-        this.openModal('spinnerModal');
+
+        this.setState({
+            modal: {
+                show: true,
+                type: 'spinner'
+            }
+        });
+
         api.auth.call(this, formData.get('email'), formData.get('password'), cookies);
     }
 
@@ -77,7 +61,10 @@ export default class Login extends React.Component {
             <>
                 {
                     this.state.modal.show &&
-                        <Modal app={this} />
+                        <Modal
+                            modal={this.state.modal}
+                            closeModal={this.closeModal}
+                        />
                 }
 
                 <section id="banner">

@@ -98,12 +98,13 @@ export default class ForecastMain extends React.Component {
                 'Sales,General,Admin Expenses': [],
                 'COGS': []
             },
+
             modal: {
                 data: {},
-                show: false,
                 text: '',
                 type: null
             },
+
             percentages: [],
             scenarios: [],
             companyName: '',
@@ -143,8 +144,9 @@ export default class ForecastMain extends React.Component {
 
         this.confirm = this.confirm.bind(this);
 
-        this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.openModal = this.openModal.bind(this);
+
         this.toggleExpandCollapse = this.toggleExpandCollapse.bind(this);
 
         this.changeScenario = this.changeScenario.bind(this);
@@ -183,19 +185,12 @@ export default class ForecastMain extends React.Component {
             //
             modal: {
                 data: {},
-                show: false
+                type: null
             }
         });
     }
 
-    openModal(type, modalData, e) {
-        if (e) {
-            e.preventDefault();
-        // Duck typing!
-        } else if (modalData && modalData.preventDefault) {
-            modalData.preventDefault();
-        }
-
+    openModal(type, modalData) {
         const [data, text] = (typeof modalData !== 'object') ?
             [null, modalData] :
             [modalData.data, modalData.text];
@@ -203,7 +198,6 @@ export default class ForecastMain extends React.Component {
         this.setState({
             modal: {
                 data,
-                show: true,
                 text,
                 type
             }
@@ -233,9 +227,8 @@ export default class ForecastMain extends React.Component {
     }
 
     async changeScenario(e) {
-        this.openModal('spinnerModal');
+        this.openModal('spinner');
         await api.changeScenario.call(this);
-        this.closeModal();
     }
 
     confirm(confirm, e) {
@@ -258,7 +251,7 @@ export default class ForecastMain extends React.Component {
         const LOB = formData.get('LOB');
 
         if (!scenarioName || !scenarioDescription || !LOB) {
-            this.openModal('messageModal', {
+            this.openModal('message', {
                 data: {
                     message: 'The following cannot be blank:',
                     fields: [
@@ -269,9 +262,8 @@ export default class ForecastMain extends React.Component {
                 }
             });
         } else {
-            this.openModal('spinnerModal', 'Please wait while we create your scenario...');
+            this.openModal('spinner', 'Please wait while we create your scenario...');
             await api.createScenario.call(this, scenarioName, scenarioDescription, formData.get('scenarioMonthEnd'), LOB, formData.get('revenueCenter'));
-            this.closeModal();
         }
     }
 
@@ -279,14 +271,13 @@ export default class ForecastMain extends React.Component {
         this.setState({
             action: {
                 yes: async () => {
-                    this.openModal('spinnerModal', 'Please wait while we delete your scenario...');
+                    this.openModal('spinner', 'Please wait while we delete your scenario...');
                     await api.deleteScenario.call(this, scenarioID);
-//                    this.closeModal();
                 }
             }
         });
 
-        this.openModal('confirmModal', {
+        this.openModal('confirm', {
             data: {
                 confirmType: 'delete'
             }
@@ -350,7 +341,7 @@ export default class ForecastMain extends React.Component {
                 action: {
                     no: cb,
                     yes: async () => {
-                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        this.openModal('spinner', 'Please wait while we save your scenario...');
 
                         if (this.state.hardSave) {
                             await api.createScenario.call(this);
@@ -358,13 +349,12 @@ export default class ForecastMain extends React.Component {
                             await api.updateScenario.call(this);
                         }
 
-                        this.closeModal();
                         cb();
                     }
                 }
             });
 
-            this.openModal('confirmModal', {
+            this.openModal('confirm', {
                 data: {
                     confirmType: 'save',
                     hardSave: this.state.hardSave,
@@ -464,8 +454,14 @@ export default class ForecastMain extends React.Component {
     }
 
     resetScenario() {
-        this.setState(defaultScenario);
-        this.closeModal();
+        this.setState(Object.assign({}, defaultScenario, {
+            actionableRows: [],
+            modal: {
+                data: {},
+                text: '',
+                type: null
+            }
+        }));
     }
 
     retrieveScenario(e) {
@@ -473,12 +469,13 @@ export default class ForecastMain extends React.Component {
 
         if (this.state.softSave || this.state.hardSave) {
             // TODO: Maybe put this elsewhere so it's not created every time this function is called.
-            const cb = this.openModal.bind(this, 'retrieveScenarioModal');
+            const cb = this.openModal.bind(this, 'retrieveScenario');
+
             this.setState({
                 action: {
                     no: cb,
                     yes: async () => {
-                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        this.openModal('spinner', 'Please wait while we save your scenario');
 
                         if (this.state.hardSave) {
                             await api.saveScenario.call(this);
@@ -486,13 +483,12 @@ export default class ForecastMain extends React.Component {
                             await api.updateScenario.call(this);
                         }
 
-                        this.closeModal();
                         cb();
                     }
                 }
             });
 
-            this.openModal('confirmModal', {
+            this.openModal('confirm', {
                 data: {
                     confirmType: 'save',
                     hardSave: this.state.hardSave,
@@ -500,7 +496,7 @@ export default class ForecastMain extends React.Component {
                 }
             });
         } else {
-            this.openModal('retrieveScenarioModal');
+            this.openModal('retrieveScenario');
         }
     }
 
@@ -509,20 +505,20 @@ export default class ForecastMain extends React.Component {
             this.setState({
                 action: {
                     yes: () => {
-                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        this.openModal('spinner', 'Please wait while we save your scenario');
                         api.saveScenario.call(this, shouldReset, defaultScenario);
                     }
                 }
             });
 
-            this.openModal('confirmModal', {
+            this.openModal('confirm', {
                 data: {
                     confirmType: 'save',
                     hardSave: this.state.hardSave
                 }
             });
         } else {
-            this.openModal('spinnerModal', 'Please wait while we save your scenario');
+            this.openModal('spinner', 'Please wait while we save your scenario');
             api.saveScenario.call(this, shouldReset, defaultScenario);
         }
     }
@@ -572,7 +568,7 @@ export default class ForecastMain extends React.Component {
     showNotes(e) {
         const target = e.currentTarget;
 
-        this.openModal('notesModal', {
+        this.openModal('notes', {
             data: {
                 name: target.innerHTML,
                 text: this.state.selectedScenario[target.innerHTML]
@@ -590,11 +586,17 @@ export default class ForecastMain extends React.Component {
         e.preventDefault();
 
         if (e.currentTarget.querySelector('input[type=submit').value === 'Exit') {
-            this.closeModal();
+            this.setState({
+                actionableRows: [],
+                modal: {
+                    data: {},
+                    text: '',
+                    type: null
+                }
+            });
         } else {
-            this.openModal('spinnerModal');
+            this.openModal('spinner');
             await api.updateForecastOptions.call(this);
-            this.closeModal();
         }
     }
 
@@ -605,24 +607,31 @@ export default class ForecastMain extends React.Component {
             this.setState({
                 action: {
                     yes: async () => {
-                        this.openModal('spinnerModal', 'Please wait while we save your scenario');
+                        this.openModal('spinner', 'Please wait while we save your scenario');
                         await api.saveScenario.call(this);
-                        this.closeModal();
                     },
-                    no: this.closeModal.bind(this)
+                    no: () => {
+                        this.setState({
+                            actionableRows: [],
+                            modal: {
+                                data: {},
+                                text: '',
+                                type: null
+                            }
+                        });
+                    }
                 }
             });
 
-            this.openModal('confirmModal', {
+            this.openModal('confirm', {
                 data: {
                     confirmType: 'save',
                     hardSave: this.state.hardSave
                 }
             });
         } else {
-            this.openModal('spinnerModal', 'Please wait while we save your scenario...');
+            this.openModal('spinner', 'Please wait while we save your scenario...');
             await api.updateScenario.call(this);
-            this.closeModal();
         }
     }
 
@@ -647,7 +656,6 @@ export default class ForecastMain extends React.Component {
                     onRetrieveScenario={this.retrieveScenario}
                     uploadDate={this.state.uploadDate}
                     onChangeUploadDate={this.changeUploadDate}
-                    onOpenModal={this.openModal}
                     onUpdateScenario={this.updateScenario}
                     onShowNotes={this.showNotes}
                 />
@@ -684,8 +692,24 @@ export default class ForecastMain extends React.Component {
                     }
 
                     {
-                        this.state.modal.show &&
-                            <Modal app={this} />
+                        this.state.modal.type &&
+                            <Modal
+                                modal={this.state.modal}
+                                scenarios={this.state.scenarios}
+                                selectedRetrievalRow={this.state.selectedRetrievalRow}
+
+                                changeScenario={this.changeScenario}
+                                selectRetrievalRow={this.selectRetrievalRow}
+
+                                closeModal={this.closeModal}
+                                confirm={this.confirm}
+
+                                selectForecastOption={this.selectForecastOption}
+                                navigateForecastOptions={this.navigateForecastOptions}
+                                updateForecastOptions={this.updateForecastOptions}
+
+                                changeText={this.changeText}
+                            />
                     }
 
                     {
@@ -700,13 +724,12 @@ export default class ForecastMain extends React.Component {
                 </section>
             </>
         ) :
-            <Login authToken={this.props.authToken} />
+            <Login />
     }
 
     async componentDidMount() {
-        this.openModal('spinnerModal');
+        this.openModal('spinner');
         await api.init.call(this);
-        this.closeModal();
     }
 }
 

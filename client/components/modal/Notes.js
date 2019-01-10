@@ -6,7 +6,6 @@ export default function Notes(props) {
         <Base
             className={`base notes ReactModal__Content__base`}
             onCloseModal={() => {}}
-            show={props.show}
         >
             <section>
                 <h3>{props.data.name || "Notes"}</h3>

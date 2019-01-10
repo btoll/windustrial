@@ -11,7 +11,6 @@ export default function ForecastOptions(props) {
         <Base
             className={`base forecastOptions ReactModal__Content__base`}
             onCloseModal={props.onClose}
-            show={props.show}
         >
             <section id="forecastOptions">
                 <h1>{props.data.row.LineItem}</h1>

@@ -6,7 +6,6 @@ export default function Message(props) {
         <Base
             className={`base message ReactModal__Content__base`}
             onCloseModal={() => {}}
-            show={props.show}
         >
             <section>
                 <h3>{props.data.message}</h3>

@@ -4,8 +4,9 @@ import ForecastOptions from '../modal/ForecastOptions';
 import Currency from '../formatters/Currency';
 import Percent from '../formatters/Percent';
 
-const prepareData = (onOpenModal, row, e) => {
-    onOpenModal('forecastOptions', row, e);
+const prepareData = (openModal, row, e) => {
+    e.preventDefault();
+    openModal('forecastOptions', row, e);
 };
 
 // Some rows, like the totals, should not have the event bound to it.

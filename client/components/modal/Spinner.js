@@ -6,7 +6,6 @@ export default function Spinner(props) {
         <Base
             className={`base spinner ReactModal__Content__base`}
             onCloseModal={() => {}}
-            show={props.show}
         >
             <section>
                 <p>{props.text || "Please wait while we fetch the latest data..."}</p>

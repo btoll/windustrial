@@ -10,66 +10,58 @@ import RetrieveScenario from './RetrieveScenario';
 import Spinner from './Spinner';
 
 export default function Modal(props) {
-    const app = props.app;
-    const state = app.state;
-    const modal = state.modal;
-
-    switch (modal.type) {
-        case 'confirmModal':
+    switch (props.modal.type) {
+        case 'confirm':
             return <Confirm
-                data={modal.data}
-                show={modal.show}
-                onClick={app.confirm}
-                onClose={app.closeModal}
+                data={props.modal.data}
+                onClick={props.confirm}
+                onClose={props.closeModal}
             />
 
-        case 'errorModal':
+        case 'error':
             return <Error
-                data={modal.data}
-                show={modal.show}
-                onClose={app.closeModal}
+                data={props.modal.data}
+                onClose={props.closeModal}
             />
 
         case 'forecastOptions':
             return <ForecastOptions
-                show={modal.show}
-                data={modal.data}
-                onSelectForecastOption={app.selectForecastOption}
-                onClose={app.closeModal}
-                onNavigate={app.navigateForecastOptions}
-                onSubmit={app.updateForecastOptions}
+                data={props.modal.data}
+                onSelectForecastOption={props.selectForecastOption}
+                onClose={props.closeModal}
+                onNavigate={props.navigateForecastOptions}
+                onSubmit={props.updateForecastOptions}
             />
 
-        case 'messageModal':
+        case 'message':
             return <Message
-                data={modal.data}
-                show={modal.show}
-                onClose={app.closeModal}
+                data={props.modal.data}
+                onClose={props.closeModal}
             />
 
-        case 'notesModal':
+        case 'notes':
             return <Notes
-                data={modal.data}
-                show={modal.show}
-                onChangeText={app.changeText}
-                onDone={app.closeModal}
+                data={props.modal.data}
+                onChangeText={props.changeText}
+                onDone={props.closeModal}
             />
 
-        case 'retrieveScenarioModal':
+        case 'retrieveScenario':
             return <RetrieveScenario
-                scenarios={state.scenarios}
-                show={modal.show}
-                onChangeScenario={app.changeScenario}
-                onSelectRetrievalRow={app.selectRetrievalRow}
-                onClose={app.closeModal}
-                selectedRetrievalRow={state.selectedRetrievalRow}
+                scenarios={props.scenarios}
+                onChangeScenario={props.changeScenario}
+                onSelectRetrievalRow={props.selectRetrievalRow}
+                onClose={props.closeModal}
+                selectedRetrievalRow={props.selectedRetrievalRow}
             />
 
-        case 'spinnerModal':
+        case 'spinner':
             return <Spinner
-                show={modal.show}
-                text={modal.text}
+                text={props.modal.text}
             />
+
+        default:
+            return <div></div>
     }
 }
 

@@ -6,7 +6,6 @@ export default function Error(props) {
         <Base
             className={`base error ReactModal__Content__base`}
             onCloseModal={props.onClose}
-            show={props.show}
         >
             <section>
                 <button className="close" onClick={props.onClose}>X</button>

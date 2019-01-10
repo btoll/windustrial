@@ -73,7 +73,6 @@ export default function Confirm(props) {
         <Base
             className={`base confirm ReactModal__Content__base`}
             onCloseModal={props.onClose}
-            show={props.show}
         >
             {children}
         </Base>
