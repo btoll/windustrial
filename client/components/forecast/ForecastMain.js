@@ -730,6 +730,17 @@ export default class ForecastMain extends React.Component {
     async componentDidMount() {
         this.openModal('spinner');
         await api.init.call(this);
+
+        if (this.state.selectedRetrievalRow) {
+            this.openModal('spinner', 'We have found an unsaved scenario, loading...');
+//            this.openModal('confirm', {
+//                text: 'We have found an unsaved scenario, loading...',
+//                data: {
+//                    confirmType: 'ack'
+//                }
+//            });
+            await api.changeScenario.call(this);
+        }
     }
 }
 

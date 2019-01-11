@@ -5,6 +5,21 @@ export default function Confirm(props) {
     let children;
 
     switch (props.data.confirmType) {
+        case 'ack':
+            children = (
+                <section>
+                    <h3>props.text</h3>
+                    <button className="close" onClick={props.onClose}>X</button>
+                    <button
+                        onClick={props.onClose}
+                        className="green-large"
+                    >
+                        OK
+                    </button>
+                </section>
+            );
+            break;
+
         case 'delete':
             children = (
                 <section>

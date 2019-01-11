@@ -14,6 +14,7 @@ export default function Modal(props) {
         case 'confirm':
             return <Confirm
                 data={props.modal.data}
+                text={props.modal.text}
                 onClick={props.confirm}
                 onClose={props.closeModal}
             />

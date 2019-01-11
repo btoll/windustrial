@@ -214,6 +214,11 @@ async function init() {
         getReportDates.call(this)
     ])
     .then(axios.spread((scenarios, lobs, reportDates) => {
+        const wip = scenarios.filter(s => s.StatusType === 'WIP');
+        const selectedRetrievalRow = wip.length ?
+            wip[0].Id :
+            '';
+
         this.setState({
             actionableRows: [],
             modal: {
@@ -225,7 +230,8 @@ async function init() {
             companyName: lobs.CompanyName,
             LOBS: lobs.LOBS,
             reportDates,
-            scenarios
+            scenarios,
+            selectedRetrievalRow
         });
     }))
     .catch(err => {
